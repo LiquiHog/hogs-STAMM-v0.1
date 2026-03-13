@@ -1,0 +1,42 @@
+name: Basic Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check CHANGELOG updated
+      if: github.event_name == 'pull_request'
+      run: |
+        if ! git diff --name-only origin/${{ github.base_ref }}..HEAD | grep -q "CHANGELOG.md"; then
+          echo "⚠️  Warning: CHANGELOG.md not updated"
+          echo "Please add an entry to CHANGELOG.md describing your changes"
+          exit 0
+        fi
+        
+    - name: Check for TODO/FIXME
+      run: |
+        if grep -r "TODO\|FIXME" --include="*.py" --include="*.md" .; then
+          echo "ℹ️  Found TODO/FIXME comments (review recommended)"
+        fi
+        
+    - name: Validate Markdown links
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'
+        config-file: '.github/markdown-link-check-config.json'
+      continue-on-error: true
+
+  # Add more jobs here as needed:
+  # - Contract compilation checks
+  # - Python linting
+  # - Test execution
