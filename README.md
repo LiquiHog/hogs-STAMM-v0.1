@@ -1,7 +1,7 @@
 # STAMM Protocol
 
 [![All Rights Reserved](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
-[![GitHub Issues](https://img.shields.io/github/issues/LiquiHog/STAMM)](https://github.com/LiquiHog/STAMM/issues)
+[![GitHub Issues](https://img.shields.io/github/issues/LiquiHog/hogs-STAMM-v0.1)](https://github.com/LiquiHog/hogs-STAMM-v0.1/issues)
 
 **Stratified Automated Market Maker — by HOG**
 
