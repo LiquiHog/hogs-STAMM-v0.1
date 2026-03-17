@@ -64,20 +64,22 @@ Tier P is a protocol-managed backstop tier with near-zero fees. It is not open t
 ## Architecture Overview
 
 ```
-                        ┌──────────────┐
-                        │  PoolFactory │
-                        └──┬───┬───┬───┘
-                           │   │   │
-                 ┌─────────┘   │   └─────────┐
-                 ▼             ▼             ▼
-            ┌────────┐   ┌────────┐   ┌────────┐
-            │ Pool A │   │ Pool B │   │ Pool C │
-            └──┬─────┘   └────────┘   └────────┘
-               │
-       ┌───┬───┼───┬───────┬───────┐
-       ▼   ▼   ▼   ▼       ▼       ▼
-      T0   T1  T2  T3     T4      T5      TP
-    0.03% 0.1% 0.3% 1%    3%      5%   ~0.0001%
+                           ┌──────────────┐
+                           │  PoolFactory │
+                           └──┬───┬───┬───┘
+                              │   │   │
+                    ┌─────────┘   │   └─────────┐
+                    ▼             ▼              ▼
+               ┌────────┐   ┌────────┐   ┌────────┐
+               │ Pool A │   │ Pool B │   │ Pool C │
+               └───┬────┘   └────────┘   └────────┘
+                   │
+     ┌──────┬──────┼──────┬──────┬──────┬──────┐
+     ▼      ▼      ▼      ▼      ▼      ▼      ▼
+  ┌──────┐┌─────┐┌─────┐┌────┐┌────┐┌────┐┌─────────┐
+  │  T0  ││ T1  ││ T2  ││ T3 ││ T4 ││ T5 ││   TP    │
+  │0.03% ││0.1% ││0.3% ││ 1% ││ 3% ││ 5% ││~0.0001% │
+  └──────┘└─────┘└─────┘└────┘└────┘└────┘└─────────┘
 ```
 
 Each pool is a standalone `TieredAMM` contract deployed by the `PoolFactory`. The factory remains governor of all pools. Treasury claims are stored in pool state and withdrawn by the admin via factory proxy methods.
