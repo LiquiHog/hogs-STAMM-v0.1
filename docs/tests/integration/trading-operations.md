@@ -47,7 +47,7 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 **Test**: Execute swaps across different fee tiers
 
 **Scenario**:
-1. Seed and activate Tier 0 (1 bps), Tier 2 (10 bps), Tier 4 (100 bps)
+1. Seed and activate Tier 0 (3 bps), Tier 2 (30 bps), Tier 4 (300 bps)
 2. Execute same-sized swap on each tier
 3. Compare output amounts and fee deductions
 

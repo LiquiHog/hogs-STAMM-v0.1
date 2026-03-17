@@ -11,31 +11,30 @@ In a traditional AMM, all liquidity providers share the same fee rate. This crea
 
 STAMM resolves this by letting the market decide. LPs choose which fee tier to provide liquidity to based on their own risk/reward preferences. Traders choose which tier to swap through based on available liquidity and fee rates.
 
-## All 8 Tiers
+## All 7 Tiers
 
-Every pool is created with all 8 tiers. LP tokens for all 8 are created during bootstrap. Four default tiers are seeded during the first liquidity deposit (`seed_and_mint`); the remaining four are seeded individually via `seed_tier`.
+Every pool is created with all 7 tiers. LP tokens for all 7 are created during bootstrap. Four default tiers are seeded during the first liquidity deposit (`seed_and_mint`); the remaining three are seeded individually via `seed_tier`.
 
 | Tier | Index | Fee Rate | Seeding | Intended Use |
 |---|---|---|---|---|
-| Tier 0 | 0 | 0.01% (1 bps) | `seed_tier` | Ultra-low fee, high-frequency |
-| Tier 1 | 1 | 0.03% (3 bps) | `seed_tier` | Low-fee active trading |
-| Tier 2 | 2 | 0.1% (10 bps) | Default | Standard trading |
-| Tier 3 | 3 | 0.3% (30 bps) | Default | Medium-fee trading |
-| Tier 4 | 4 | 1% (100 bps) | Default | Volatile pairs |
-| Tier 5 | 5 | 3% (300 bps) | `seed_tier` | High-fee passive LP |
-| Tier 6 | 6 | 5% (500 bps) | `seed_tier` | Maximum protection |
-| Tier P | 7 | ~0.0001% (1 ppm) | Default | Protocol backstop |
+| Tier 0 | 0 | 0.03% (3 bps) | `seed_tier` | Low-fee active trading |
+| Tier 1 | 1 | 0.1% (10 bps) | Default | Standard trading |
+| Tier 2 | 2 | 0.3% (30 bps) | Default | Medium-fee trading |
+| Tier 3 | 3 | 1% (100 bps) | Default | Volatile pairs |
+| Tier 4 | 4 | 3% (300 bps) | `seed_tier` | High-fee passive LP |
+| Tier 5 | 5 | 5% (500 bps) | `seed_tier` | Maximum protection |
+| Tier P | 6 | ~0.0001% (1 ppm) | Default | Protocol backstop |
 
 ## Tier Index Range
 
 | Index | Role |
 |---|---|
-| 0-6 | Standard tiers with fixed fee rates |
-| 7 | Tier P (passive tier, fixed 1 ppm fee) |
+| 0-5 | Standard tiers with fixed fee rates |
+| 6 | Tier P (passive tier, fixed 1 ppm fee) |
 
 ## Tier P (Passive Tier)
 
-Tier P is a special tier at index 7 with unique properties:
+Tier P is a special tier at index 6 with unique properties:
 
 - **Near-zero fee**: 1 part per million (0.0001%), calculated as `max(1, amount / 1,000,000)`
 - **No protocol fee extraction**: 100% of fees stay in the tier's reserves
@@ -50,7 +49,7 @@ Tier P is protocol-managed — it is not open to public LPs. Its liquidity is bu
 
 A tier is seeded with 1 microunit of each asset (reserve_a = 1, reserve_b = 1, total_lp = 1). The 1 LP token is locked in the pool permanently. Seeding marks the tier as existing but not yet active for trading.
 
-Default tiers (P, 2, 3, 4) are seeded during `seed_and_mint`. Non-default tiers (0, 1, 5, 6) are seeded individually via `seed_tier`.
+Default tiers (P, 1, 2, 3) are seeded during `seed_and_mint`. Non-default tiers (0, 4, 5) are seeded individually via `seed_tier`.
 
 ### Auto-Activation
 
@@ -78,17 +77,18 @@ Tier active states are packed into a single `tier_mask` bitmask (uint64). Bit `i
 
 ## Inline Spill Targeting
 
-The protocol identifies the two weakest standard tiers (lowest k-values) inline during each swap via an O(7) scan of active tiers. These tiers receive the majority of protocol fee redistribution via inline spill (55% to the weakest, 35% to the second weakest). The tier being operated on is excluded from the scan to prevent state conflicts.
+The protocol identifies the two weakest standard tiers (lowest k-values) inline during each swap via an O(6) scan of active standard tiers (0-5). These tiers receive the majority of protocol fee redistribution via inline spill (55% to the weakest, 35% to the second weakest). The tier being operated on is excluded from the scan to prevent state conflicts.
 
 ## How Traders Choose a Tier
 
 From a trader's perspective, the choice is straightforward:
 
-- **Small trades**: Use the lowest-fee tier with sufficient liquidity (usually Tier 0 or Tier P)
+- **Small trades**: Use the lowest-fee tier with sufficient liquidity
 - **Large trades**: Use a tier with deep enough reserves to handle the trade without excessive slippage
 - **Price-sensitive trades**: Compare output across tiers and pick the best one
+- **Automatic**: Use the smart-routed swap (`swap_smart`), which auto-routes across up to 2 tiers using waterfall routing for optimal execution
 
-Frontend applications and SDKs can automate this comparison. The contract itself does not route between tiers — each swap executes on exactly one tier.
+Frontend applications and SDKs can automate tier comparison. For manual tier selection, each swap executes on exactly one tier. The `swap_smart` method handles multi-tier routing automatically.
 
 ## How LPs Choose a Tier
 

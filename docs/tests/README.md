@@ -12,7 +12,7 @@ The integration test suite validates end-to-end protocol behavior on a live Algo
 
 #### Core Infrastructure
 - **Factory Deployment**: Factory contract compilation, deployment, and initialization
-- **Pool Creation**: Multi-tier pool instantiation with automatic LP token creation for all 8 tiers
+- **Pool Creation**: Multi-tier pool instantiation with automatic LP token creation for all 7 tiers
 - **Bootstrap Operations**: Initial liquidity seeding and tier setup
 
 #### Trading Operations
@@ -64,7 +64,7 @@ The integration test suite validates end-to-end protocol behavior on a live Algo
 ### Test Results
 
 All integration tests **passed successfully**, validating:
-- ✅ All 8 tiers function correctly across all operation types
+- ✅ All 7 tiers function correctly across all operation types
 - ✅ K-invariant maintained across swaps (reserves × fees preserved)
 - ✅ Slippage protection enforced for all operations
 - ✅ Fee accounting accurate across single and multi-tier operations
@@ -128,7 +128,7 @@ Property-based tests **passed across hundreds of thousands of randomized example
 
 ### Coverage
 The test suite exercises:
-- All 8 fee tiers (0.01% to 5%, plus 0.0001% passive tier)
+- All 7 fee tiers (0.03% to 5%, plus ~0.0001% protocol tier)
 - All operation types (swap, swap_limit, mint, burn, mint_single, burn_single, mint_hybrid)
 - Both asset pair types (ASA/ASA and ALGO/ASA)
 - Multi-user concurrent scenarios

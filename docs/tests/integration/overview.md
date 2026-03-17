@@ -19,7 +19,7 @@ Integration tests validate end-to-end protocol behavior on a live AlgoKit LocalN
 1. **LocalNet Initialization**: Spin up fresh Algorand sandbox network
 2. **Factory Deployment**: Compile and deploy PoolFactory contract
 3. **Pool Creation**: Deploy TieredAMM instance for test asset pair
-4. **Bootstrap**: Opt into assets, create all 8 LP tokens with fee rates
+4. **Bootstrap**: Opt into assets, create all 7 LP tokens with fee rates
 5. **LP Box Registration**: Register reverse LP lookup boxes on factory
 6. **Initial Liquidity**: Seed default tiers and add first real liquidity
 
@@ -55,7 +55,7 @@ The integration test suite covers:
 ## Test Results Summary
 
 All integration tests **passed successfully**, confirming:
-- All 8 tiers function correctly across all operation types
+- All 7 tiers function correctly across all operation types
 - K-invariant maintained across swaps
 - Slippage protection enforced
 - Fee accounting accurate

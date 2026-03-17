@@ -59,7 +59,7 @@ When Hypothesis finds a failing case:
 - **Amounts**: 1 microunit to 10^12 (covers dust to large trades)
 - **Reserves**: Bootstrap state (1:1) to deep liquidity (millions)
 - **LP Supply**: Seed state (1 LP) to large pools (billions of LP)
-- **Fee Tiers**: All 8 tiers with fee rates from 1 bps to 500 bps
+- **Fee Tiers**: All 7 tiers with fee rates from 3 bps to 500 bps
 
 ### Edge Cases Explored
 

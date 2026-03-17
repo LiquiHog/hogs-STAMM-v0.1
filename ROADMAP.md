@@ -6,17 +6,14 @@ Features and improvements under consideration for STAMM. Items are listed roughl
 
 ## Under Consideration
 
-### Routed Swaps
-Split a single trade across multiple tiers to reduce slippage on large swaps. The caller provides (tier, amount) pairs computed off-chain; the contract validates and executes each sub-swap atomically.
-
 ### Configurable Fee Parameters
 Make protocol fee split ratios (spill percentages, tier-retained/protocol) adjustable per pool or globally through the factory, rather than hardcoded constants.
 
 ### Enhanced Oracle
 Extended oracle data (volume-weighted metrics, volatility indicators) for richer on-chain and off-chain price feeds.
 
-### Hybrid Burn
-Burn LP tokens and receive both assets in a user-specified ratio, controlled by a swap percentage parameter. At low percentages, behaves close to a proportional burn; at high percentages, behaves close to a single-sided burn.
+### Multi-Tier Routed Swaps
+Extend `swap_smart` waterfall routing beyond 2 tiers, allowing callers to provide (tier, amount) pairs computed off-chain for finer-grained slippage reduction on very large swaps.
 
 ---
 

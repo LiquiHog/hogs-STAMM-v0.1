@@ -45,49 +45,53 @@ A price-limited swap (`swap_limit`) executes as much of the input as possible wi
 - Uses 128-bit square root (`sqrt128`) and wide math internally; requires an OpUp budget call
 - If the current pool price is already at or below the limit, the transaction reverts (`"price at limit"`)
 
+### Smart-Routed Swap
+
+A smart-routed swap (`swap_smart`) automatically routes a trade across up to 2 tiers using waterfall routing. The caller does not need to choose a tier — the contract selects the optimal path.
+
+**Flow:**
+1. Trader sends input tokens. No tier index is specified.
+2. Contract scans all active tiers and ranks them by fee-adjusted rate (output/input ratio discounted by fee)
+3. The best and second-best tiers are identified
+4. Contract computes the waterfall capacity — the amount that equalizes the best tier's post-swap rate with the second-best's current rate
+5. If the input fits within capacity (or only one tier qualifies), 100% routes to the best tier
+6. Otherwise, capacity routes to the best tier and the remainder overflows to the second-best tier
+7. Both sub-swaps apply the full two-sided fee, inline spill, and k-growth assertion independently
+8. Total output from both tiers is sent to the trader
+
+**Key properties:**
+- Automatically finds the best execution across the pool's liquidity
+- Supports up to 2-tier waterfall split for large trades
+- `min_output` slippage protection applies to the combined output
+- No off-chain precomputation required — routing is fully on-chain
+- Uses wide math for capacity calculation (`sqrt128`, `safe_mul_div`)
+
 ---
 
 ## Liquidity Operations
 
-### Standard Mint (Two-Sided)
+All mint and burn operations use a single unified entry point each. The contract determines the operation mode from the provided parameters.
 
-Deposit both assets proportional to the tier's current reserve ratio. Receive LP tokens representing your share of the tier.
+### Mint
 
-- **Bootstrap mint**: First deposit into a seeded tier. The deposit uses ADD semantics (new reserves = seed reserves + deposit). Any ratio is accepted — the depositor sets the initial price. LP tokens minted using geometric mean calculation to ensure fair initial distribution.
-- **Proportional mint**: Subsequent deposits must match the current ratio. The binding side determines LP minted. Excess on the non-binding side is refunded.
+A single `mint` method handles all deposit modes:
 
-### Hybrid Mint
+- **Bootstrap mint**: First deposit into a seeded tier (k ≤ bootstrap threshold). Both assets required, any ratio accepted. The depositor sets the initial price. LP tokens minted using geometric mean (`sqrt(deposit_a × deposit_b)`).
+- **Balanced mint**: Both deposits match the tier's current ratio. No swap fee. The binding side determines LP minted; excess on the non-binding side is refunded.
+- **Hybrid mint**: Both deposits provided but off-ratio. The contract computes the optimal swap amount, internally swaps the excess through the tier's reserves to balance the deposit, then mints LP from the result. The swap portion incurs the tier's two-sided fee. More capital efficient than balanced mint (all deposited assets are used).
+- **Single-sided mint**: One deposit is zero. The contract computes the optimal swap split using 128-bit square root, swaps part of the deposit for the other asset, then mints LP from the balanced result. The swap portion incurs the tier's two-sided fee. Not available on bootstrap tiers. Tiny residuals from rounding are refunded.
 
-Deposit both assets in any ratio. The contract internally swaps the excess through the tier's reserves to balance the deposit, then mints LP from the result.
+The caller sends two deposits (A and B) in the same group. Either deposit may be zero for single-sided minting. For ALGO pools: Payment for A-side, AssetTransfer for B-side. Tier P is not open to public mints.
 
-- More capital efficient than standard mint (no refund, all deposited assets are used)
-- The swap portion incurs the tier's two-sided fee
-- Useful when you have an unbalanced position and want to provide all of it
+### Burn
 
-### Single-Sided Mint
+A single `burn` method handles all withdrawal modes, selected by the `output_asset` parameter:
 
-Deposit only one asset. The contract computes the optimal swap split, swaps part of the deposit for the other asset, then mints LP from the balanced result.
+- **Proportional burn** (`output_asset` = pool LP asset): Returns both Asset A and Asset B proportional to the LP share. Always available, even on inactive tiers. Floor division favors the pool.
+- **Single-sided burn to A** (`output_asset` = asset A): Burns proportionally, then internally swaps the B portion for A. Incurs the tier's two-sided fee on the swap portion.
+- **Single-sided burn to B** (`output_asset` = asset B): Burns proportionally, then internally swaps the A portion for B. Incurs the tier's two-sided fee on the swap portion.
 
-- Uses 128-bit square root to find the optimal swap amount
-- The swap portion incurs the tier's two-sided fee
-- Not available on bootstrap tiers (no established ratio to target)
-- Tiny residuals from fee rounding are refunded
-
-### Standard Burn (Two-Sided)
-
-Burn LP tokens to withdraw both assets proportionally from the tier.
-
-- Always available, even on inactive tiers (LPs can always exit)
-- Floor division favors the pool (prevents rounding exploits)
-- Reserves must remain at least 1 microunit after withdrawal
-- Final burn (all user LP withdrawn, tier returns to seed state): excess reserves swept to treasury, tier auto-deactivates
-
-### Single-Sided Burn
-
-Burn LP tokens and receive only one asset. The contract burns proportionally (receiving both assets internally), then swaps the unwanted asset for the desired one.
-
-- The swap portion incurs the tier's two-sided fee
-- Not available on bootstrap tiers
+Final burn (all user LP withdrawn, tier returns to seed state): excess reserves beyond (1,1) are swept to treasury claims, and the tier auto-deactivates.
 
 ---
 
@@ -112,11 +116,12 @@ The SDK handles this automatically — callers specify asset IDs and amounts, an
 |---|---|---|---|---|
 | Swap | 1 | 1 | Yes (two-sided) | No |
 | Swap (limit) | 1 | 1 + refund | Yes (two-sided) | No |
-| Mint (standard) | 2 | LP + refund | No | Yes |
-| Mint (hybrid) | 2 | LP | On excess swap | Yes (falls back to standard) |
-| Mint (single) | 1 | LP + residual | On swap portion | No |
-| Burn (standard) | LP | 2 | No | Yes |
-| Burn (single) | LP | 1 | On swap portion | No |
+| Swap (smart) | 1 | 1 | Yes (two-sided, per tier) | No |
+| Mint (balanced) | 2 | LP + refund | No | Yes |
+| Mint (hybrid) | 2 | LP + residual | On excess swap | No |
+| Mint (single-sided) | 1 (+ 0) | LP + residual | On swap portion | No |
+| Burn (proportional) | LP | 2 | No | Yes |
+| Burn (single-sided) | LP | 1 | On swap portion | No |
 
 ---
 
@@ -126,8 +131,8 @@ All user-facing operations include slippage parameters:
 
 - **Swaps**: `min_output` — minimum output tokens
 - **Price-limited swaps**: `min_output` — minimum output tokens (in addition to the price limit)
+- **Smart-routed swaps**: `min_output` — minimum combined output from all tiers
 - **Mints**: `min_lp_out` — minimum LP tokens to receive
-- **Standard burns**: `min_a_out` / `min_b_out` — minimum per-asset output
-- **Single burns**: `min_output` — minimum total output
+- **Burns**: `min_a_out` / `min_b_out` — minimum per-asset output (used for both proportional and single-sided modes)
 
 If the actual result is below the minimum, the transaction fails atomically. No partial execution.

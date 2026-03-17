@@ -11,7 +11,7 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Test**: `seed_and_mint` seeds 4 default tiers (P, 2, 3, 4)
 
 **Scenario**:
-1. Pool bootstrapped with 8 LP assets created
+1. Pool bootstrapped with 7 LP assets created
 2. User calls `seed_and_mint` with liquidity for Tier 2
 3. Contract seeds Tier P, 2, 3, 4 with 1 microunit each asset
 4. Adds real liquidity to chosen tier (Tier 2)
@@ -179,13 +179,13 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Test**: Tier mask correctly represents active tier set
 
 **Scenario**:
-1. Activate Tier 0 (bit 0), Tier 3 (bit 3), Tier P (bit 7)
-2. Tier mask = 0b10001001 = 137
+1. Activate Tier 0 (bit 0), Tier 3 (bit 3), Tier P (bit 6)
+2. Tier mask = 0b1001001 = 73
 
 **Assertions**:
 - Bit `i` set ⟺ tier `i` active
 - Bit check: `mask & (1 << tier)` returns non-zero for active tiers
-- Efficient single-uint64 storage for all 8 tier states
+- Efficient single-uint64 storage for all 7 tier states
 
 ---
 

@@ -94,7 +94,7 @@ This eliminates governance attack vectors around manual tier activation/deactiva
 
 ## Tier Index Validation
 
-All operations that accept a tier index validate that it falls within the valid range (0-7). This prevents out-of-bounds access to state keys.
+All operations that accept a tier index validate that it falls within the valid range (0-6). This prevents out-of-bounds access to state keys.
 
 ## Permissionless Operations
 

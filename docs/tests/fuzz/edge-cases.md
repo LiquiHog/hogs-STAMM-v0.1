@@ -123,7 +123,7 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 
 #### TWAP Accumulator Overflow
 1. Generate years of continuous accumulation
-2. Verify 128-bit accumulators never overflow in realistic scenarios
+2. Verify 256-bit accumulators never overflow in realistic scenarios
 3. Price × time products remain within 128-bit
 
 **Assertion**:

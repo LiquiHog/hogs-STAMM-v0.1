@@ -18,20 +18,33 @@ The TWAP is updated at the **start** of every swap, mint, and burn operation. Th
 
 ### Accumulator Mechanics
 
-The oracle maintains two 128-bit accumulators (each split into high/low uint64 words):
+The oracle maintains two 256-bit accumulators (each split into four uint64 words: `_3` most significant through `_0` least significant):
 
-- **Accumulator A**: Cumulative price of Asset A in terms of Asset B
-- **Accumulator B**: Cumulative price of Asset B in terms of Asset A
+- **Accumulator A** (`twap_ca_3/2/1/0`): Cumulative price of Asset A in terms of Asset B
+- **Accumulator B** (`twap_cb_3/2/1/0`): Cumulative price of Asset B in terms of Asset A
 
 On each update:
 1. Compute `elapsed = current_timestamp - last_timestamp`
 2. If elapsed > 0 and reserves are non-zero:
    - Calculate current price of A in terms of B using aggregate reserves with fixed-point scaling
    - Calculate current price of B in terms of A using aggregate reserves with fixed-point scaling
-   - Add `price × elapsed` to respective accumulators (128-bit addition with carry handling)
+   - Add `price × elapsed` to respective accumulators (256-bit addition with full carry propagation across all 4 words)
 3. Update `last_timestamp`
 
 The fixed-point scaling provides sufficient precision for price ratios while keeping arithmetic within AVM capabilities.
+
+---
+
+## Cumulative Volume Tracking
+
+In addition to the TWAP oracle, every pool maintains 128-bit cumulative volume counters for both assets:
+
+- **`vol_a_hi`, `vol_a_lo`**: Cumulative volume of Asset A across all swaps
+- **`vol_b_hi`, `vol_b_lo`**: Cumulative volume of Asset B across all swaps
+
+Volume is accumulated on every swap (including both sides of smart-routed swaps). The counters use 128-bit arithmetic (`addw` with carry propagation) to prevent overflow over the pool's lifetime.
+
+These counters enable off-chain analytics and can be used for volume-weighted pricing calculations.
 
 ---
 
