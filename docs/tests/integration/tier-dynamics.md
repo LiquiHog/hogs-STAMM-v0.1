@@ -8,17 +8,17 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 
 ### Default Tier Seeding
 
-**Test**: `seed_and_mint` seeds 4 default tiers (P, 2, 3, 4)
+**Test**: `seed_and_mint` seeds 4 default tiers (P, 1, 2, 3)
 
 **Scenario**:
-1. Pool bootstrapped with 7 LP assets created
+1. Pool bootstrapped with 6 LP assets created
 2. User calls `seed_and_mint` with liquidity for Tier 2
-3. Contract seeds Tier P, 2, 3, 4 with 1 microunit each asset
+3. Contract seeds Tier P, 1, 2, 3 with 1 microunit each asset
 4. Adds real liquidity to chosen tier (Tier 2)
 5. Tier 2 auto-activates (total_lp > 1)
 
 **Assertions**:
-- Tiers P, 2, 3, 4 have state: reserve_a = 1, reserve_b = 1, total_lp = 1
+- Tiers P, 1, 2, 3 have state: reserve_a = 1, reserve_b = 1, total_lp = 1
 - Tier 2 receives real liquidity and auto-activates
 - Other default tiers remain inactive (seeded but not activated)
 - Tier mask updated to include active Tier 2
@@ -36,7 +36,7 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 4. Subsequent mint on Tier 0 activates it
 
 **Assertions**:
-- Non-default tier (0, 1, 5, 6) can be seeded individually
+- Non-default tier (0, 4) can be seeded individually
 - Seed state identical to default tier seeding
 - Tier remains inactive until first real mint
 - Tier mask not updated until activation
@@ -100,11 +100,11 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Test**: Activate multiple tiers independently
 
 **Scenario**:
-1. Seed Tiers 0, 1, 2, 3, 4, 5, 6, P
+1. Seed Tiers 0, 1, 2, 3, 4, P
 2. Mint liquidity to Tier 0 → activates
 3. Mint liquidity to Tier 3 → activates
 4. Mint liquidity to Tier P → activates
-5. Tier mask = bits 0, 3, 7 set
+5. Tier mask = bits 0, 3, 5 set
 
 **Assertions**:
 - Each tier activates independently
@@ -179,13 +179,13 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Test**: Tier mask correctly represents active tier set
 
 **Scenario**:
-1. Activate Tier 0 (bit 0), Tier 3 (bit 3), Tier P (bit 6)
-2. Tier mask = 0b1001001 = 73
+1. Activate Tier 0 (bit 0), Tier 3 (bit 3), Tier P (bit 5)
+2. Tier mask = 0b101001 = 41
 
 **Assertions**:
 - Bit `i` set ⟺ tier `i` active
 - Bit check: `mask & (1 << tier)` returns non-zero for active tiers
-- Efficient single-uint64 storage for all 7 tier states
+- Efficient single-uint64 storage for all 6 tier states
 
 ---
 
@@ -209,13 +209,13 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Test**: Inline spill scans active tiers using mask
 
 **Scenario**:
-1. Active tiers: 0, 2, 4, P (mask = 0b10010101)
+1. Active tiers: 0, 2, 4, P (mask = 0b110101)
 2. Swap on Tier 2 triggers inline spill
 3. Scan excludes Tier 2 (current_tier)
 4. Considers Tier 0, 4, P for weakest-tier targeting
 
 **Assertions**:
-- Scan loops over 0-6 (standard tiers)
+- Scan loops over 0-5 (all tiers)
 - Skips current_tier to prevent state clobbering
 - Checks `mask & (1 << t)` for active status
 - Excludes Tier P from weakest scan (has fixed allocation)
@@ -230,7 +230,7 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 
 **Scenario**:
 1. Agg reserves: agg_ra = 10M, agg_rb = 20M (from active tiers)
-2. Tier 5 activates with reserves 1M A, 2M B
+2. Tier 4 activates with reserves 1M A, 2M B
 3. Agg reserves update: agg_ra = 11M, agg_rb = 22M
 
 **Assertions**:
@@ -246,7 +246,7 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 
 **Scenario**:
 1. Agg reserves: agg_ra = 11M, agg_rb = 22M
-2. Tier 5 deactivates (reserves 1M A, 2M B swept)
+2. Tier 4 deactivates (reserves 1M A, 2M B swept)
 3. Agg reserves update: agg_ra = 10M, agg_rb = 20M
 
 **Assertions**:
@@ -310,11 +310,11 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Test**: Operations revert on invalid tier index
 
 **Scenario**:
-1. User calls `swap` with tier_index = 8 (out of range)
+1. User calls `swap` with tier_index = 7 (out of range)
 2. Transaction reverts: `"invalid tier"`
 
 **Assertions**:
-- Tier index must be < NUM_TIERS (< 8)
+- Tier index must be < NUM_TIERS (< 6)
 - All operations validate tier index
 - Consistent error message across methods
 
@@ -347,10 +347,10 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Test**: Inactive tier activates when spill pushes total_lp > 1
 
 **Scenario**:
-1. Tier 5 inactive but seeded (total_lp = 1)
+1. Tier 4 inactive but seeded (total_lp = 1)
 2. Receives inline spill deposits
 3. LP minted from spill > 0 → total_lp = 1 + minted
-4. Tier 5 auto-activates
+4. Tier 4 auto-activates
 
 **Assertions**:
 - Inline spill can trigger activation

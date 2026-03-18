@@ -22,7 +22,7 @@ Hypothesis generates random test cases including:
 
 - **Operation types**: swap, mint, burn, mint_single, mint_hybrid, burn_single
 - **Amounts**: Random values from small (1 microunit) to large (millions)
-- **Tiers**: Random tier selection (0-7)
+- **Tiers**: Random tier selection (0-5)
 - **Asset directions**: A→B or B→A for swaps
 - **User roles**: Multiple simulated users with independent balances
 
@@ -59,7 +59,7 @@ When Hypothesis finds a failing case:
 - **Amounts**: 1 microunit to 10^12 (covers dust to large trades)
 - **Reserves**: Bootstrap state (1:1) to deep liquidity (millions)
 - **LP Supply**: Seed state (1 LP) to large pools (billions of LP)
-- **Fee Tiers**: All 7 tiers with fee rates from 3 bps to 500 bps
+- **Fee Tiers**: All 6 tiers with fee rates from 3 bps to 300 bps
 
 ### Edge Cases Explored
 

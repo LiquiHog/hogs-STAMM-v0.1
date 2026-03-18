@@ -31,9 +31,9 @@ Value: itob(pool_app_id)                                   \
      + itob(tier_index)                                    /
 ```
 
-All values are big-endian uint64. The tier index is 0-6.
+All values are big-endian uint64. The tier index is 0-5.
 
-Written during `register_pool_lps`. Seven entries per pool (one per tier).
+Written during `register_pool_lps`. Six entries per pool (one per tier).
 
 ---
 
@@ -51,7 +51,7 @@ Or via direct box read with key `"p" + itob(min(a,b)) + itob(max(a,b))`.
 
 ### Pool → LP Tokens
 
-Each pool stores 7 LP asset IDs in global state under keys `t{c}_la` where `{c}` is the tier character (`0`-`5`, `p`):
+Each pool stores 6 LP asset IDs in global state under keys `t{c}_la` where `{c}` is the tier character (`0`-`4`, `p`):
 
 ```
 Pool global state:
@@ -60,7 +60,6 @@ Pool global state:
   t2_la → LP asset ID for tier 2
   t3_la → LP asset ID for tier 3
   t4_la → LP asset ID for tier 4
-  t5_la → LP asset ID for tier 5
   tp_la → LP asset ID for Tier P
 ```
 
@@ -109,13 +108,13 @@ This is solved with a two-step flow:
 
 ```
 Step 1: create_pool
-  → Deploys pool, bootstraps (creates 7 LP tokens)
+  → Deploys pool, bootstraps (creates 6 LP tokens)
   → Writes pair registry box
   → Pool's "registered" flag = 0
 
 Step 2: register_pool_lps
-  → Reads 7 LP asset IDs from pool state
-  → Writes 7 reverse LP boxes on factory
+  → Reads 6 LP asset IDs from pool state
+  → Writes 6 reverse LP boxes on factory
   → Sets pool's "registered" flag = 1
 
 Step 3: seed_and_mint
@@ -142,10 +141,10 @@ Reads the pair registry box and returns the pool app ID.
 
 ### `register_pool_lps(pay, uint64) → void`
 
-Writes 7 reverse LP boxes for a pool. Permissionless.
+Writes 6 reverse LP boxes for a pool. Permissionless.
 
 - **Seed payment**: Minimum 140,000 µALGO covering box MBR
-- **Transaction requirements**: 7 box references (`"l" + itob(lp_id)` per tier), pool app in foreign apps
+- **Transaction requirements**: 6 box references (`"l" + itob(lp_id)` per tier), pool app in foreign apps
 - **Checks**: Factory created the pool, pool not already registered
 - **Side effect**: Sets `registered = 1` on the pool via inner app call
 
@@ -160,8 +159,8 @@ Reads a reverse LP box and returns 32 bytes of context.
 | Registry | Boxes per Pool | Cost per Box (µALGO) | Total (µALGO) |
 |---|---|---|---|
 | Pair | 1 | 2,500 + 400 × 25 = 12,500 | 12,500 |
-| Reverse LP | 7 | 2,500 + 400 × 41 = 18,900 | 132,300 |
-| **Total** | **8** | | **144,800** |
+| Reverse LP | 6 | 2,500 + 400 × 41 = 18,900 | 113,400 |
+| **Total** | **7** | | **125,900** |
 
 Pair box MBR is covered by `MIN_SEED_CREATE_POOL`. Reverse LP box MBR is covered by `MIN_SEED_REGISTER_LPS` (140,000 µALGO).
 
@@ -193,7 +192,7 @@ info = get_lp_info(algod, factory_app_id, lp_asset_id)
 ```python
 from stamm.factory import prepare_register_pool_lps_transactions
 
-# lp_asset_ids: list of 7 LP asset IDs read from pool global state
+# lp_asset_ids: list of 6 LP asset IDs read from pool global state
 txn_group = prepare_register_pool_lps_transactions(
     factory_app_id, pool_app_id, lp_asset_ids, sender, sp
 )

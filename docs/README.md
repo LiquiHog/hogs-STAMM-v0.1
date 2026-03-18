@@ -11,7 +11,7 @@ Multi-tier constant-product AMM for Algorand with inline fee redistribution and 
 foundational architecture and tier mechanics
 
 - **[Architecture](core/architecture.md)** — Contract design, state layout, deployment flow
-- **[Tiers](core/tiers.md)** — 7-tier system, lifecycle, activation/deactivation
+- **[Tiers](core/tiers.md)** — 6-tier system, lifecycle, activation/deactivation
 
 ### Features
 

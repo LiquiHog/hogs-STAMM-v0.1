@@ -31,7 +31,7 @@ This holds because fees are retained in reserves on both sides, causing k to gro
 
 **Parameters**:
 - Swap amounts: 1 to 10^9 microunits
-- Tiers: All 7 tiers with varying fee rates
+- Tiers: All 6 tiers with varying fee rates
 - Directions: Random A→B or B→A
 - Sequence length: 1 to 100 swaps per test
 
@@ -72,7 +72,7 @@ protocol_fee_in + protocol_fee_out = spill_to_tier_p + spill_to_weakest + spill_
 
 **Parameters**:
 - Input amounts: 1 to 10^12 microunits
-- Tiers: All 7 (including Tier P with 100% retention)
+- Tiers: All 6 (including Tier P with 100% retention)
 - Spill targets: Random weak tier configurations
 
 **Assertions**:
@@ -111,7 +111,7 @@ contract_balance_b - treasury_claim_b = sum(tier_reserves_b) for all active tier
 3. Assert reserves match balances (accounting for treasury)
 
 **Parameters**:
-- Operations: All 7 types (swap, mint, burn, mint_single, burn_single, mint_hybrid, swap_limit)
+- Operations: All 7 types (swap, swap_limit, mint, burn, mint_single, burn_single, mint_hybrid)
 - Sequence length: 10 to 500 operations
 - Users: 1 to 5 concurrent users
 - Tiers: Random tier activation states
@@ -155,7 +155,7 @@ For any operation sequence, the sum of all mints minus the sum of all burns must
 **Parameters**:
 - Operations: mint, burn, mint_single, burn_single, mint_hybrid
 - Amounts: Random LP quantities from 1 to 10^9
-- Tiers: All 7 tiers
+- Tiers: All 6 tiers
 - Sequence length: 10 to 100 operations
 
 **Assertions**:
@@ -191,7 +191,7 @@ Swap output is calculated using constant-product mechanics, where the effective 
 **Parameters**:
 - Input amounts: 1 to 10^9
 - Reserves: 1,000 to 10^12 (bootstrap to deep liquidity)
-- Tiers: All 7 fee rates
+- Tiers: All 6 fee rates
 
 **Assertions**:
 - Contract raw output (before output fee) = `dy_expected`

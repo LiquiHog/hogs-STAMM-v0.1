@@ -12,8 +12,8 @@ Make protocol fee split ratios (spill percentages, tier-retained/protocol) adjus
 ### Enhanced Oracle
 Extended oracle data (volume-weighted metrics, volatility indicators) for richer on-chain and off-chain price feeds.
 
-### Multi-Tier Routed Swaps
-Extend `swap_smart` waterfall routing beyond 2 tiers, allowing callers to provide (tier, amount) pairs computed off-chain for finer-grained slippage reduction on very large swaps.
+### Caller-Directed Routed Swaps
+Allow callers to provide explicit (tier, amount) pairs computed off-chain, bypassing the on-chain routing table. This enables custom routing strategies and finer-grained control beyond the automatic 3-tier waterfall in `swap_smart`.
 
 ---
 

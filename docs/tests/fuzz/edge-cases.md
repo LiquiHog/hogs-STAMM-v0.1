@@ -114,8 +114,8 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 
 #### Fee Calculation Overflow
 1. Swap amount = 2^63 (very large)
-2. Fee bps = 500 (5%)
-3. Calculate: (2^63 × 500) / 10,000 using mulw/divmodw
+2. Fee bps = 300 (3%)
+3. Calculate: (2^63 × 300) / 10,000 using mulw/divmodw
 4. Verify no overflow
 
 **Assertion**:
@@ -283,7 +283,7 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 - ✅ Single tier receives full 90% standard allocation
 
 #### Multiple Standard Tiers
-- Active: Tier 0 (weakest), Tier 3 (2nd weakest), Tier 5
+- Active: Tier 0 (weakest), Tier 3 (2nd weakest), Tier 4
 - Allocation: 10% Tier P, 55% Tier 0, 35% Tier 3
 
 **Assertion**:

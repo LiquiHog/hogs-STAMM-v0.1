@@ -18,7 +18,7 @@ Pool creation access is controlled by a `creation_mode` setting: paused (no new 
 
 ### TieredAMM (Pool)
 
-Each pool is an independent smart contract managing 7 fee tiers for a single asset pair. The pool handles all trading operations:
+Each pool is an independent smart contract managing 6 fee tiers for a single asset pair. The pool handles all trading operations:
 
 - Swaps (standard, price-limited, and smart-routed), mints (balanced, hybrid, and single-sided via unified entry point), and burns (proportional and single-sided via unified entry point)
 - Per-tier reserve and LP token management
@@ -35,15 +35,21 @@ Pools support both ASA/ASA pairs and ALGO/ASA pairs natively. For ALGO pools, as
 ```
 1. Deploy PoolFactory
 
+1b. Initialize template:
+    Factory.init_template(approval_size, clear_program)
+    Factory.upload_template(offset, chunk) × N
+    - Stores compiled TieredAMM approval/clear programs in factory box storage
+    - Required before any pool can be created
+
 2. Create pool: Factory.create_pool(asset_a, asset_b)
    - Factory deploys TieredAMM instance
    - Funds pool with ALGO for MBR
-   - Bootstraps pool (opts into assets, creates all 7 LP tokens)
+   - Bootstraps pool (opts into assets, creates all 6 LP tokens)
    - Registers pair in box storage
 
 3. Register LP boxes: Factory.register_pool_lps(pool)
-   - Reads 7 LP asset IDs from pool global state
-   - Writes 7 reverse LP lookup boxes on the factory
+   - Reads 6 LP asset IDs from pool global state
+   - Writes 6 reverse LP lookup boxes on the factory
    - Marks pool as registered (sets registered = 1 on pool)
 
 4. Seed and add liquidity: Pool.seed_and_mint(amounts, tier)
@@ -52,7 +58,7 @@ Pools support both ASA/ASA pairs and ALGO/ASA pairs natively. For ALGO pools, as
    - Adds real liquidity to the chosen tier
 
 5. (Optional) Seed additional tiers: Pool.seed_tier(tier_index)
-   - Seeds a non-default tier (0, 4, or 5) with 1 micro of each asset
+   - Seeds a non-default tier (0 or 4) with 1 micro of each asset
 ```
 
 ## State Layout
@@ -69,7 +75,7 @@ Pools support both ASA/ASA pairs and ALGO/ASA pairs natively. For ALGO pools, as
 
 ### Pool State (per tier)
 
-Each tier `t` uses keys prefixed with its character (`0`-`5` for standard, `p` for Tier P):
+Each tier `t` uses keys prefixed with its character (`0`-`4` for standard, `p` for Tier P):
 
 | Key Pattern | Type | Description |
 |---|---|---|
@@ -89,7 +95,7 @@ Fee rates are hardcoded in the contract (`get_tier_fee()`) — not stored in sta
 | `asset_b` | uint64 | Asset B ID |
 | `governor` | bytes | Governor address (factory) |
 | `tr_a`, `tr_b` | uint64 | Treasury asset claims |
-| `tier_mask` | uint64 | Bits 0-6: active tier flags |
+| `tier_mask` | uint64 | Bits 0-5: active tier flags |
 | `agg_ra`, `agg_rb` | uint64 | Aggregate reserves across active tiers |
 | `twap_ca_3`, `twap_ca_2`, `twap_ca_1`, `twap_ca_0` | uint64 | TWAP accumulator A (256-bit, 4 words: `_3` most significant → `_0` least significant) |
 | `twap_cb_3`, `twap_cb_2`, `twap_cb_1`, `twap_cb_0` | uint64 | TWAP accumulator B (256-bit, 4 words) |
@@ -98,7 +104,7 @@ Fee rates are hardcoded in the contract (`get_tier_fee()`) — not stored in sta
 | `vol_b_hi`, `vol_b_lo` | uint64 | Cumulative volume Asset B (128-bit) |
 | `registered` | uint64 | LP box registration flag (0 or 1) |
 
-Total: 7×5 + 21 ints + 1 bytes = 56 uints + 1 bytes (8 spare slots within AVM max of 64).
+Total: 6×5 + 21 ints + 1 bytes = 51 uints + 1 bytes used. Deployed with global_num_uint=51 (13 spare slots within AVM max of 64).
 
 ## ABI Methods
 
@@ -108,7 +114,7 @@ Total: 7×5 + 21 ints + 1 bytes = 56 uints + 1 bytes (8 spare slots within AVM m
 |---|---|
 | `swap(txn,uint64,uint64,uint64,uint64)void` | Standard single-tier swap |
 | `swap_limit(txn,uint64,uint64,uint64,uint64,uint64,uint64)void` | Price-limited partial swap with refund |
-| `swap_smart(txn,uint64,uint64,uint64)void` | Auto-routed swap across up to 2 tiers via waterfall routing |
+| `swap_smart(txn,uint64,uint64,uint64)void` | Auto-routed swap across up to 3 tiers via waterfall routing |
 | `mint(txn,axfer,uint64,uint64,uint64,uint64,uint64)void` | Unified LP deposit (balanced, hybrid, or single-sided) |
 | `burn(axfer,uint64,uint64,uint64,uint64,uint64,uint64,uint64)void` | Unified LP withdrawal (proportional or single-sided via `output_asset`) |
 
@@ -116,7 +122,7 @@ Total: 7×5 + 21 ints + 1 bytes = 56 uints + 1 bytes (8 spare slots within AVM m
 
 | Method | Description |
 |---|---|
-| `bootstrap(uint64,uint64)void` | Initialize pool with assets and create 7 LP tokens |
+| `bootstrap(uint64,uint64)void` | Initialize pool with assets and create 6 LP tokens |
 | `seed_and_mint(txn,axfer,uint64,uint64,uint64,uint64,uint64)void` | Seed default tiers + add initial liquidity |
 | `seed_tier(txn,axfer,uint64,uint64,uint64)void` | Seed a single non-default tier |
 | `set_registered()void` | Mark pool as registered (called by factory) |
@@ -127,8 +133,10 @@ Total: 7×5 + 21 ints + 1 bytes = 56 uints + 1 bytes (8 spare slots within AVM m
 
 | Method | Description |
 |---|---|
+| `init_template(pay,uint64,byte[])void` | Initialize template storage boxes (admin only) |
+| `upload_template(uint64,byte[])void` | Upload approval program chunk (admin only) |
 | `create_pool(pay,uint64,uint64)uint64` | Deploy and bootstrap a new pool |
-| `register_pool_lps(pay,uint64)void` | Write 7 reverse LP boxes + mark pool registered |
+| `register_pool_lps(pay,uint64)void` | Write 6 reverse LP boxes + mark pool registered |
 | `get_pool(uint64,uint64)uint64` | Look up pool app ID for an asset pair |
 | `get_lp_info(uint64)byte[]` | Look up pool info for an LP asset ID |
 | `propose_admin(address)void` | Propose a new admin (current admin only) |
@@ -142,7 +150,7 @@ Total: 7×5 + 21 ints + 1 bytes = 56 uints + 1 bytes (8 spare slots within AVM m
 
 **Single contract per pool**: All tiers live in one contract. This enables atomic cross-tier operations (inline spill, aggregate oracle) that would require complex group transactions if tiers were separate contracts.
 
-**All 7 tiers at bootstrap**: Every pool starts with all 7 LP tokens created upfront. This avoids dynamic tier management complexity and ensures the reverse LP registry can be populated immediately after pool creation. Tiers start unseeded and auto-activate on first real deposit.
+**All 6 tiers at bootstrap**: Every pool starts with all 6 LP tokens created upfront. This avoids dynamic tier management complexity and ensures the reverse LP registry can be populated immediately after pool creation. Tiers start unseeded and auto-activate on first real deposit.
 
 **Factory as governor**: Pools cannot self-govern. This ensures consistent admin policy across all pools and prevents individual pool compromise from affecting the protocol.
 

@@ -7,12 +7,12 @@ All notable changes to the STAMM protocol will be documented here.
 ## Unreleased
 
 ### Core
-- 7-tier constant-product AMM with per-tier reserves, fees, and LP tokens
-- All 7 tiers created upfront during bootstrap (no governor add/remove)
-- Tier P (index 6) with 1 ppm fee and no protocol extraction
+- 6-tier constant-product AMM with per-tier reserves, fees, and LP tokens
+- All 6 tiers created upfront during bootstrap (no governor add/remove)
+- Tier P (index 5) with 1 ppm fee and no protocol extraction
 - Standard swap with slippage protection and k-invariant enforcement
 - Price-limited swap (`swap_limit`) with partial execution and atomic refund
-- Smart-routed swap (`swap_smart`) with waterfall routing across up to 2 tiers
+- Smart-routed swap (`swap_smart`) with waterfall routing across up to 3 tiers
 - Unified `mint` supporting balanced, hybrid (swap excess + mint), and single-sided (optimal swap split via 128-bit sqrt) modes
 - Unified `burn` supporting proportional and single-sided (burn + internal swap) modes via `output_asset` parameter
 - Bitmask-based tier active tracking (`tier_mask`)
@@ -33,7 +33,7 @@ All notable changes to the STAMM protocol will be documented here.
 - Two-sided fee model: half fee on input, half on output
 - 80/20 tier-retained/protocol fee split
 - Inline spill: protocol fees redistributed per-swap to Tier P (10%) + 2 weakest tiers (55% + 35%)
-- Weakest tier indices computed inline per-swap via O(6) scan (no cached state)
+- Weakest tier indices computed inline per-swap via O(5) scan (no cached state)
 - Self-tier exclusion: spill skips the tier being operated on to prevent state conflicts
 - Pull model treasury: claims stored in pool state (`tr_a`, `tr_b`, `t{c}_tl`)
 - Dust from spill (amounts too small to mint LP) goes to treasury claims
@@ -51,7 +51,7 @@ All notable changes to the STAMM protocol will be documented here.
 - Reverse LP registry: factory box storage maps any LP asset ID to its pool, pair, and tier
 - Two-step pool creation: create_pool -> register_pool_lps -> seed_and_mint
 - `registered` flag gates seed_and_mint (ensures LP boxes are written before liquidity)
-- Two-step admin transfer: `propose_admin` -> `accept_admin` (with `cancel_propose_admin`)
+- Two-step admin transfer: `propose_admin` -> `accept_admin` (with `cancel_admin_proposal`)
 - Factory verifies pool ownership on all proxy operations
 - Seed payment sender validation on pool/tier creation
 
@@ -61,4 +61,5 @@ All notable changes to the STAMM protocol will be documented here.
 - Inline bootstrap checks using already-read reserves
 - Aggregate reserves used for total liquidity calculations
 - No external keeper required — all fee distribution is inline
-- 56 uint64 + 1 bytes global state (8 spare slots within AVM max of 64)
+- 51 uint64 + 1 bytes global state (13 spare slots within AVM max of 64)
+- Routing table (RT) box: per-tier fee-adjusted scores for swap_smart tier selection

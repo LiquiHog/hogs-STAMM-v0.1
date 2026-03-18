@@ -47,23 +47,24 @@ A price-limited swap (`swap_limit`) executes as much of the input as possible wi
 
 ### Smart-Routed Swap
 
-A smart-routed swap (`swap_smart`) automatically routes a trade across up to 2 tiers using waterfall routing. The caller does not need to choose a tier — the contract selects the optimal path.
+A smart-routed swap (`swap_smart`) automatically routes a trade across up to 3 tiers using waterfall routing. The caller does not need to choose a tier — the contract selects the optimal path using a pre-computed routing table (RT) box.
 
 **Flow:**
 1. Trader sends input tokens. No tier index is specified.
-2. Contract scans all active tiers and ranks them by fee-adjusted rate (output/input ratio discounted by fee)
-3. The best and second-best tiers are identified
+2. Contract reads the routing table (RT) box, which stores fee-adjusted scores for each tier
+3. The best, second-best, and third-best tiers are identified by score
 4. Contract computes the waterfall capacity — the amount that equalizes the best tier's post-swap rate with the second-best's current rate
 5. If the input fits within capacity (or only one tier qualifies), 100% routes to the best tier
-6. Otherwise, capacity routes to the best tier and the remainder overflows to the second-best tier
-7. Both sub-swaps apply the full two-sided fee, inline spill, and k-growth assertion independently
-8. Total output from both tiers is sent to the trader
+6. Otherwise, capacity routes to the best tier and the remainder is split between the best and second-best tiers using fee-adjusted proportional weighting
+7. If the remainder exceeds the second-best’s equalization capacity with the third-best, a 3-tier proportional split is used
+8. All sub-swaps apply the full two-sided fee, inline spill, and k-growth assertion independently
+9. Total output from all tiers is sent to the trader
 
 **Key properties:**
 - Automatically finds the best execution across the pool's liquidity
-- Supports up to 2-tier waterfall split for large trades
+- Supports up to 3-tier waterfall split for large trades
 - `min_output` slippage protection applies to the combined output
-- No off-chain precomputation required — routing is fully on-chain
+- Routing table is updated after every state-changing operation (swaps, mints, burns)
 - Uses wide math for capacity calculation (`sqrt128`, `safe_mul_div`)
 
 ---

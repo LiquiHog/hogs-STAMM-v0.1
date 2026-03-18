@@ -40,7 +40,7 @@ This produces protocol fees in both assets on every swap, enabling balanced inli
 
 | Tier Type | Fee Calculation |
 |---|---|
-| Standard (0-5) | Proportional to tier's fee rate (in basis points), split across input and output (each side min 1 micro) |
+| Standard (0-4) | Proportional to tier's fee rate (in basis points), split across input and output (each side min 1 micro) |
 | Tier P | Approximately 1 part per million, with minimum 1 microunit floor (each side min 1 micro) |
 
 ### 2. Tier Retained vs. Protocol
@@ -65,7 +65,7 @@ The redistribution targets three tiers:
 | Weakest tier | 55% | Lowest k-value among active standard tiers |
 | 2nd weakest tier | 35% | Second-lowest k-value |
 
-The weakest tiers are determined by an inline O(6) scan during each swap. The scan excludes the tier being operated on to prevent state conflicts (the caller has a pending state update that would overwrite the spill's changes). If only one standard tier is active (besides the current), it receives the full 90% standard allocation. If no standard tiers qualify, the 90% goes to treasury claims.
+The weakest tiers are determined by an inline O(5) scan during each swap. The scan excludes the tier being operated on to prevent state conflicts (the caller has a pending state update that would overwrite the spill's changes). If only one standard tier is active (besides the current), it receives the full 90% standard allocation. If no standard tiers qualify, the 90% goes to treasury claims.
 
 ### 4. LP Minting and Treasury Claims
 

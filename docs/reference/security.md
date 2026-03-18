@@ -47,7 +47,7 @@ The AVM operates on uint64 arithmetic (0 to 2^64 - 1). STAMM uses several strate
 - **`mulw` / `divmodw`**: 128-bit wide math for products that may exceed uint64
 - **`safe_mul_div`**: Computes `a * b / c` using wide intermediates
 - **`sqrt128`**: 128-bit square root via Newton's method for single-sided mint and price-limited swap calculations
-- **TWAP accumulators**: 128-bit (split into hi/lo words) to prevent wraparound over long periods
+- **TWAP accumulators**: 256-bit (split into 4 × uint64 words) to prevent wraparound over long periods
 
 ## Slippage Protection
 
@@ -94,7 +94,7 @@ This eliminates governance attack vectors around manual tier activation/deactiva
 
 ## Tier Index Validation
 
-All operations that accept a tier index validate that it falls within the valid range (0-6). This prevents out-of-bounds access to state keys.
+All operations that accept a tier index validate that it falls within the valid range (0-5). This prevents out-of-bounds access to state keys.
 
 ## Permissionless Operations
 
