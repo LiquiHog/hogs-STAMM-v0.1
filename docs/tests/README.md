@@ -19,6 +19,7 @@ The integration test suite validates end-to-end protocol behavior on a live Algo
 - **Standard Swaps**: Constant-product trades with fee application and slippage protection
 - **Price-Limited Swaps**: Partial execution swaps with atomic refunds when price limits are hit
 - **Multi-Tier Routing**: Trades across different fee tiers (3 bps to 300 bps)
+- **Caller-Directed Routing**: Explicit (tier, amount) legs via `swap_routed` with 1-6 legs
 - **Asset Pair Support**: Both ASA/ASA and ALGO/ASA pool configurations
 
 #### Liquidity Management
@@ -52,8 +53,16 @@ The integration test suite validates end-to-end protocol behavior on a live Algo
 - **Sweep Operations**: Correct reserve cleanup on tier deactivation
 
 #### Administrative Functions
-- **Governor Controls**: Admin operations restricted to factory contract
-- **Admin Transfer**: Successful transfer of pool admin privileges
+- **Governor Controls**: Admin operations restricted to admin contract (as governor)
+- **Governor Transfer**: Factory transfers governor to admin contract during registration
+- **Admin Transfer**: 7-day timelock on factory admin transfer; 72-hour timelock on admin contract admin transfer
+- **Factory Freeze/Unfreeze**: Instant freeze, 7-day timelock unfreeze
+- **Admin Contract Freeze**: 72-hour timelock propose/confirm, irreversible
+- **Governor Migration**: 72-hour timelock propose/confirm per pool via admin contract; functional even when admin contract is frozen
+- **Registry Management**: Factory registry change with 7-day timelock (propose/confirm/cancel)
+- **Registry Freeze**: Permanent/irreversible freeze blocking all writes; reads remain functional
+- **Registry Writer Authorization**: Only the factory (writer) can register pair/LP data
+- **Treasury Proxy**: Admin contract withdraws treasury claims from pools (`withdraw_pool_lp`, `withdraw_pool_assets`)
 - **Access Control**: Rejection of unauthorized admin calls
 
 #### Contract Validation

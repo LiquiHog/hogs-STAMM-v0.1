@@ -31,7 +31,7 @@ Each half split: 80% stays in tier reserves (tier-retained)
 
 Each swap charges fees on both the input and output sides. For a tier with fee rate `f`:
 
-- **Input fee** = `floor(f / 2)` of the input amount, floored to 1 microunit
+- **Input fee** = `floor(total_fee / 2)`, where `total_fee = floor(amount × fee_rate / 10000)`, floored to 1 microunit
 - **Output fee** = remainder applied to the raw output, floored to 1 microunit
 
 Both sides are floored to a minimum of 1 microunit. This guarantees that every successful swap grows the k-invariant, even for very small trades where the calculated fee would otherwise round to zero.
@@ -49,7 +49,7 @@ For standard tiers, each half-fee is split:
 - **80%** stays in the tier's reserves (benefits LPs directly)
 - **20%** is extracted as the protocol fee
 
-Tier P keeps **100%** of its fee — no protocol extraction. This protects Tier P and keeps the near-zero fee tier attractive.
+Tier P keeps **100%** of its fee — no protocol extraction. This protects [Tier P](../core/tiers.md#tier-p-passive-tier) and keeps the near-zero fee tier attractive.
 
 Combined with the per-side fee floor of 1 microunit, the tier-retained portion guarantees the k-invariant always grows on every successful swap.
 
@@ -65,15 +65,15 @@ The redistribution targets three tiers:
 | Weakest tier | 55% | Lowest k-value among active standard tiers |
 | 2nd weakest tier | 35% | Second-lowest k-value |
 
-The weakest tiers are determined by an inline O(5) scan during each swap. The scan excludes the tier being operated on to prevent state conflicts (the caller has a pending state update that would overwrite the spill's changes). If only one standard tier is active (besides the current), it receives the full 90% standard allocation. If no standard tiers qualify, the 90% goes to treasury claims.
+The weakest tiers are determined by an inline scan of all active tiers during each swap, excluding the tier being operated on. Only standard tiers (0-4) are eligible as weakest/second-weakest recipients. If only one standard tier is active (besides the current), it receives the full 90% standard allocation. If no standard tiers qualify, the 90% goes to treasury claims.
 
 ### 4. LP Minting and Treasury Claims
 
-For each recipient tier, the spill amounts are added to the tier's reserves and proportional LP tokens are minted. These LP tokens stay in the pool — the treasury's share is tracked in `t{c}_tl` state for later withdrawal by the admin.
+For each recipient tier, the spill amounts are added to the tier's reserves and proportional LP tokens are minted. These LP tokens stay in the pool — the treasury's share is tracked in `t{c}_tl` state for later withdrawal by the admin contract (governor).
 
 If the spill amount is too small to mint any LP (dust), the tokens go to treasury asset claims (`tr_a`/`tr_b`) instead.
 
-Inactive but seeded tiers can also receive spill — amounts are added at the aggregate reserve ratio and LP is minted proportionally.
+Inactive but seeded tiers can also receive spill — amounts are added at the aggregate reserve ratio and LP is minted using a formula suited for non-proportional deposit ratios.
 
 ---
 
@@ -87,9 +87,9 @@ All protocol revenue is stored in pool state rather than transferred to a separa
 | Asset A | `tr_a` | Dust from spill |
 | Asset B | `tr_b` | Dust from spill |
 
-The admin withdraws claims via factory proxy methods:
-- `withdraw_pool_lp(pool, tier, amount, receiver, lp_asset)`
-- `withdraw_pool_assets(pool, a_asset, b_asset, a_amount, b_amount, receiver)`
+The admin contract (as governor) withdraws claims directly from each pool via proxy methods:
+- `withdraw_pool_lp(application, tier, amount, receiver, lp_asset)`
+- `withdraw_pool_assets(application, a_asset, b_asset, a_amount, b_amount, receiver)`
 
 This pull model eliminates the need for treasury opt-ins, reduces inner transactions during trading, and ensures withdrawals never block normal pool operations.
 

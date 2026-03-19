@@ -29,21 +29,39 @@ All tiers live inside one smart contract, enabling atomic operations that aren't
 
 ## Key Features
 
+### Trading & Liquidity
+
 | Feature | Description |
 |---|---|
 | **6 Stratified Tiers** | 6 independent fee tiers per asset pair, all created at bootstrap |
-| **Tier P** | Protocol-managed backstop tier with ~0.0001% fees |
+| **Tier P** | Protocol-managed backstop tier with ~1 ppm (0.0001%) fees |
 | **Native ALGO Pools** | Full support for ALGO/ASA pairs — ALGO as asset A |
+| **Smart-Routed Swaps** | Auto-route trades across up to 3 tiers via waterfall routing |
+| **Caller-Directed Routed Swaps** | Explicit (tier, amount) legs computed off-chain, 1-6 legs per swap |
+| **Auto Tier Management** | Tiers auto-activate on first mint, auto-deactivate on full withdrawal |
+| **TWAP Oracle** | 256-bit inline time-weighted average price oracle across all active tiers |
+| **Volume Tracking** | 128-bit cumulative volume counters for both assets |
+
+### Fee System
+
+| Feature | Description |
+|---|---|
 | **Two-Sided Fees** | Fee split across input and output for inline redistribution |
 | **Inline Spill** | Protocol fees redistributed to weak tiers on every swap |
 | **Pull Model Treasury** | Treasury claims stored in pool state, withdrawn on demand |
-| **TWAP Oracle** | 256-bit inline time-weighted average price oracle across all active tiers |
-| **Volume Tracking** | 128-bit cumulative volume counters for both assets |
-| **Smart-Routed Swaps** | Auto-route trades across up to 3 tiers via waterfall routing |
-| **Auto Tier Management** | Tiers auto-activate on first mint, auto-deactivate on full withdrawal |
+
+### Infrastructure & Governance
+
+| Feature | Description |
+|---|---|
+| **Factory Architecture** | Lightweight deployment tool — pools governed by admin contract after registration |
 | **Configurable Pool Creation** | Factory creation mode: paused, admin-only, or permissionless |
-| **Factory Architecture** | Pools deployed and governed through a factory contract |
-| **Reverse LP Registry** | Any LP token can be resolved to its pool, pair, and tier via factory box lookup |
+| **Admin Contract Governance** | Permanent governor of all pools with 72-hour timelocks, treasury withdrawals, and governor migration |
+| **Registry Contract** | Permanent on-chain registry for pair/LP discovery — survives factory replacement |
+| **Reverse LP Registry** | Any LP token can be resolved to its pool, pair, and tier via registry box lookup |
+| **7-Day Factory Timelocks** | Factory admin transfer, admin contract/registry changes, and unfreeze require 7-day timelock |
+| **72-Hour Admin Timelocks** | Admin contract admin transfer, freeze, and governor migration use 72-hour timelock |
+| **Factory Freeze** | Instant freeze blocks template/update/delete; unfreeze requires 7-day timelock |
 
 ## Tiers
 
@@ -65,34 +83,40 @@ Tier P is a protocol-managed backstop tier with near-zero fees. It is not open t
 ```
                            ┌──────────────┐
                            │  PoolFactory │
-                           └──┬───┬───┬───┘
-                              │   │   │
-                    ┌─────────┘   │   └─────────┐
-                    ▼             ▼              ▼
-               ┌────────┐   ┌────────┐   ┌────────┐
-               │ Pool A │   │ Pool B │   │ Pool C │
-               └───┬────┘   └────────┘   └────────┘
-                   │
-     ┌──────┬──────┼──────┬──────┬─────────┐
-     ▼      ▼      ▼      ▼      ▼         ▼
-  ┌──────┐┌─────┐┌─────┐┌────┐┌────┐┌─────────┐
-  │  T0  ││ T1  ││ T2  ││ T3 ││ T4 ││   TP    │
-  │0.03% ││0.1% ││0.3% ││ 1% ││ 3% ││~0.0001% │
-  └──────┘└─────┘└─────┘└────┘└────┘└─────────┘
+                           └─────┬──┬────┘
+                                 │  │
+              ┌──────────────┘  └──────────────┐
+              │                              │
+              ▼                              ▼
+     ┌────────────────┐           ┌─────────────────┐
+     │ AdminContract  │           │ RegistryContract│
+     │  (governor)    │           │  (pair/LP boxes)│
+     └───┬────┬────┬──┘           └─────────────────┘
+         │    │    │
+         ▼    ▼    ▼
+    ┌─────┐┌─────┐┌─────┐
+    │Pool││Pool││Pool│
+    │  A ││  B ││  C │
+    └─┬──┘└─────┘└─────┘
+      │
+  ┌──┬──┬──┬──┬──┐
+  ▼  ▼  ▼  ▼  ▼  ▼
+ T0 T1 T2 T3 T4 TP
 ```
 
-Each pool is a standalone `TieredAMM` contract deployed by the `PoolFactory`. The factory remains governor of all pools. Treasury claims are stored in pool state and withdrawn by the admin via factory proxy methods.
+Each pool is a standalone `TieredAMM` contract deployed by the `PoolFactory`. After registration, the factory transfers governor authority to the `AdminContract`, which becomes the permanent governor of all pools. Pair and LP registries live in the `RegistryContract`, which survives factory replacement. Treasury claims are stored in pool state and withdrawn by the admin contract (as governor).
 
 ## Pool Creation Flow
 
 ```
 1. Factory.create_pool(asset_a, asset_b)
    -> Deploys pool, funds MBR, bootstraps (creates 6 LP tokens)
-   -> Registers pair in factory box storage
+   -> Forwards MBR to registry and registers pair
 
 2. Factory.register_pool_lps(pool)
-   -> Writes 6 reverse LP lookup boxes on factory
+   -> Forwards MBR to registry and registers 6 reverse LP lookup boxes
    -> Marks pool as registered
+   -> Transfers governor authority to admin contract
 
 3. Pool.seed_and_mint(amounts, tier)
    -> Seeds default 4 tiers (P, 1, 2, 3) with 1 micro each
@@ -116,7 +140,7 @@ Comprehensive documentation organized by topic. See [docs/README.md](docs/README
 - **[Oracle](docs/features/oracle.md)** — TWAP price oracle design and consumption
 
 ### Reference
-- **[Indexing & Lookups](docs/reference/indexing.md)** — Pool, pair, and LP token resolution via factory registries
+- **[Indexing & Lookups](docs/reference/indexing.md)** — Pool, pair, and LP token resolution via registry contract
 - **[Security](docs/reference/security.md)** — Safety checks, invariants, and protections
 - **[Glossary](docs/reference/glossary.md)** — Key terms and definitions
 

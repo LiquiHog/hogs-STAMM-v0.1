@@ -4,6 +4,10 @@ STAMM implements multiple layers of protection against common AMM attack vectors
 
 ---
 
+# Pool Security
+
+Protections enforced within TieredAMM pool contracts — math safety, rounding, and per-operation guards.
+
 ## Invariant Enforcement
 
 Every swap enforces the constant-product invariant: `k_new > k_old`, where `k = reserve_a * reserve_b`. The strict inequality (not just `>=`) is guaranteed by minimum fee floors — both the input fee and output fee are floored to at least 1 microunit, ensuring k always grows regardless of trade size or fee rate. Swaps too small to produce any output after the fee (typically under 3-4 microunits) fail with a clear error rather than a silent invariant violation.
@@ -62,17 +66,45 @@ ALGO pools (asset A = ALGO, id 0) include additional protections:
 - **Transaction type validation**: A-side deposits are validated as Payment transactions for ALGO pools, AssetTransfer for ASA pools. Mixed types are rejected.
 - **Close-remainder protection**: Payment deposits assert `close_remainder_to == zero_address` to prevent draining
 
+---
+
+# Infrastructure Security
+
+Protections across factory, admin contract, registry, and governance operations.
+
 ## Governor Model
 
-Pools are governed by the factory contract, not by individual accounts. This means:
+Pools are governed by the admin contract, not by the factory or individual accounts. After pool creation and LP registration, the factory transfers governor authority to the admin contract via `transfer_governor`. This means:
 
-- Pool configuration changes require going through the factory
-- The factory's admin controls all pools uniformly
+- Pool governance operations require going through the admin contract
+- The admin contract controls all pools uniformly as their governor
 - Compromising a single pool's admin key doesn't happen (pools don't have individual admin keys)
+- The factory is a lightweight deployment tool and cannot perform governor operations after handoff
+- Even if the factory is deleted or replaced, the admin contract retains governor authority over all existing pools
+
+## Admin Contract Security
+
+The [admin contract](admin-contract.md) implements its own security layer separate from the factory:
+
+- **72-hour timelock**: Admin transfer (`propose_admin` → `accept_admin`) requires a 259,200-second waiting period
+- **Irreversible freeze**: Freeze is proposed with a 72-hour timelock (`propose_freeze` → `confirm_freeze`), and once confirmed it cannot be undone
+- **Freeze scope**: A frozen admin contract blocks update and delete operations. Treasury withdrawals, admin transfer, and governor migration remain functional
+- **Governor migration**: Pools can be migrated to a new governor via `propose_migration` → `confirm_pool_migration` (72-hour timelock, per-pool). Migration works even when the admin contract is frozen, ensuring pools are never permanently locked
+- **Treasury proxy**: The admin contract withdraws treasury claims from pools on behalf of the protocol (`withdraw_pool_lp`, `withdraw_pool_assets`)
+
+## Factory Security Controls
+
+The factory implements multiple safety mechanisms:
+
+- **7-day timelocks**: Admin transfer, admin contract changes, registry changes, and unfreeze all require a 604,800-second waiting period
+- **Instant freeze**: The factory can be frozen immediately, blocking template uploads, contract updates, and deletions
+- **Freeze scope**: Pool creation and LP registration remain functional during a freeze
+- **Admin contract validation**: Proposed admin contracts are verified as valid Algorand applications before acceptance
+- **Registry change timelock**: Switching the registry contract requires a full 7-day propose/confirm cycle, preventing silent registry substitution
 
 ## Pool Ownership Verification
 
-All factory proxy methods verify that the target pool was created by the factory (via `app_creator` check). This prevents interaction with rogue contracts that impersonate STAMM pools.
+Factory registration methods verify that the target pool was created by the factory (via `app_creator` check). This prevents interaction with rogue contracts that impersonate STAMM pools.
 
 ## Seed Payment Validation
 
@@ -80,7 +112,17 @@ Pool creation, LP registration, and tier seeding methods validate that the seed 
 
 ## Registration Gate
 
-The `seed_and_mint` method requires `registered == 1` before proceeding. This ensures the factory's reverse LP lookup boxes are written before any liquidity enters the pool, maintaining registry completeness.
+The `seed_and_mint` method requires `registered == 1` before proceeding. This ensures the registry contract’s reverse LP lookup boxes are written before any liquidity enters the pool, maintaining registry completeness.
+
+## Registry Security
+
+The registry contract enforces strict access control and permanence:
+
+- **Writer authorization**: Only the designated writer (the factory’s application address) can register new pair and LP data
+- **Creator verification**: `register_lps` verifies the pool’s creator matches the writer, preventing registration of rogue contracts
+- **Irreversible freeze**: `freeze_registry` permanently blocks all write operations. Reads remain fully functional
+- **Admin independence**: The registry admin can be transferred even when frozen, ensuring the contract is never orphaned
+- **Permanence**: Because the registry is a separate contract from the factory, lookup data survives factory replacement or deletion
 
 ## Auto Tier Management
 
@@ -105,11 +147,11 @@ Several operations are intentionally permissionless to prevent the protocol from
 
 ## Treasury Pull Model
 
-Treasury claims (LP tokens, dust assets) are stored in pool state rather than transferred during swaps. The admin withdraws on demand via factory proxy methods. This eliminates opt-in coordination, reduces inner transactions during trading, and ensures withdrawals never block normal pool operations.
+Treasury claims (LP tokens, dust assets) are stored in pool state rather than transferred during swaps. The admin contract (as governor) withdraws on demand. This eliminates opt-in coordination, reduces inner transactions during trading, and ensures withdrawals never block normal pool operations.
 
 ## Known Limitations
 
 - **No reentrancy guard**: Algorand's execution model (no recursive app calls within a group) provides inherent reentrancy protection
 - **Timestamp dependence**: The TWAP oracle relies on block timestamps, which have limited granularity on Algorand (~3.3 second blocks)
 - **Single-block manipulation**: Within a single block, a large trade can temporarily skew the price. The TWAP's time-weighting mitigates this over longer windows
-- **Price limit approximation**: The `swap_limit` method uses a fee-free approximation for the maximum input calculation. Tier-retained fees cause the actual post-swap price to differ from the exact limit by a negligible amount (1-2 microunits), always in the conservative direction (price stays at or above the limit)
+- **Price limit approximation**: The `swap_limit` method adjusts the user's price limit for fee impact, then uses the constant-product formula to compute the maximum input. Tier-retained fees cause the actual post-swap price to differ from the exact adjusted limit by a negligible amount (1-2 microunits), always in the conservative direction (price stays at or above the limit)

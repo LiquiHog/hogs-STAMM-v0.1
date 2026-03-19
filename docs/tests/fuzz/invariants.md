@@ -8,26 +8,26 @@ Property-based tests that validate mathematical invariants — properties that m
 
 ### Property
 
-After any swap, the product of reserves must be greater than or equal to the pre-swap product:
+After any swap, the product of reserves must be strictly greater than the pre-swap product:
 
 ```
 k_post = reserve_a_post × reserve_b_post
 k_pre = reserve_a_pre × reserve_b_pre
-assert k_post ≥ k_pre
+assert k_post > k_pre
 ```
 
-This holds because fees are retained in reserves on both sides, causing k to grow.
+This holds because fee floors guarantee at least 1 microunit is retained on both sides, causing k to strictly grow on every successful swap.
 
 ---
 
 ### Test
 
-**Property**: K-invariant never decreases
+**Property**: K-invariant strictly grows on every swap
 
 **Strategy**:
 1. Generate random swap sequences (A→B and B→A)
 2. Record k before and after each swap
-3. Assert k_post ≥ k_pre for every swap
+3. Assert k_post > k_pre for every swap
 
 **Parameters**:
 - Swap amounts: 1 to 10^9 microunits

@@ -1,6 +1,6 @@
 # Indexing & Lookups
 
-STAMM's factory provides on-chain registries for resolving pools, assets, and LP tokens. Two box-storage registries cover both directions: finding a pool from an asset pair, and finding a pool from an LP token.
+STAMM's registry contract provides permanent on-chain registries for resolving pools, assets, and LP tokens. Two box-storage registries cover both directions: finding a pool from an asset pair, and finding a pool from an LP token. The registry is a standalone contract that survives factory replacement, ensuring lookup data is never lost.
 
 ---
 
@@ -17,7 +17,7 @@ Value: itob(pool_app_id)                                  (8 bytes)
 
 Asset IDs are sorted (lower first) so the lookup is canonical regardless of which order the caller provides them.
 
-Written during `create_pool`. One entry per pool. Only one pool per asset pair is allowed.
+Written during `create_pool` (factory forwards MBR to the registry and calls `register_pair`). One entry per pool. Only one pool per asset pair is allowed.
 
 ### Reverse LP Registry — "I have an LP token, what pool/pair/tier is it?"
 
@@ -33,7 +33,7 @@ Value: itob(pool_app_id)                                   \
 
 All values are big-endian uint64. The tier index is 0-5.
 
-Written during `register_pool_lps`. Six entries per pool (one per tier).
+Written during `register_pool_lps` (factory forwards MBR to the registry and calls `register_lps`). Six entries per pool (one per tier).
 
 ---
 
@@ -96,26 +96,27 @@ Type:  uint64
 Value: 0 = not registered, 1 = registered
 ```
 
-This flag is set by the factory during `register_pool_lps` and checked by `seed_and_mint` to ensure the registry is populated before liquidity enters.
+This flag is set during `register_pool_lps` and checked by `seed_and_mint` to ensure the registry is populated before liquidity enters.
 
 ---
 
-## Why Two Steps?
+## Why Separate Registration?
 
 The reverse LP boxes cannot be written during `create_pool` because LP asset IDs are created by inner transactions during bootstrap — their IDs are not known at transaction construction time and cannot be included as box references in the same call.
 
-This is solved with a two-step flow:
+This is solved by splitting registration from deployment:
 
 ```
 Step 1: create_pool
   → Deploys pool, bootstraps (creates 6 LP tokens)
-  → Writes pair registry box
+  → Forwards pair-box MBR to registry, calls register_pair
   → Pool's "registered" flag = 0
 
 Step 2: register_pool_lps
   → Reads 6 LP asset IDs from pool state
-  → Writes 6 reverse LP boxes on factory
+  → Forwards LP-box MBR to registry, calls register_lps
   → Sets pool's "registered" flag = 1
+  → Transfers governor authority to admin contract
 
 Step 3: seed_and_mint
   → Requires registered == 1
@@ -130,27 +131,39 @@ Step 3: seed_and_mint
 
 ### `create_pool(pay, uint64, uint64) → uint64`
 
-Deploys a new pool and writes the pair registry box.
+Deploys a new pool, forwards pair-box MBR to the registry, and calls `register_pair`.
 
 - **Returns**: Pool app ID
-- **Box written**: `"p" + itob(min_asset_id) + itob(max_asset_id)` → `itob(pool_app_id)`
+- **Registry box written**: `"p" + itob(min_asset_id) + itob(max_asset_id)` → `itob(pool_app_id)`
+
+### `register_pool_lps(pay, uint64) → void`
+
+Forwards LP-box MBR to the registry, calls `register_lps`, and transfers governor to the admin contract. Permissionless.
+
+- **Seed payment**: Minimum 150,000 µALGO covering box MBR
+- **Transaction requirements**: Pool app in foreign apps, registry app in foreign apps
+- **Checks**: Factory created the pool, pool not already registered, registry configured
+- **Side effects**: Sets `registered = 1` on the pool, transfers governor to admin contract
+
+---
+
+## Registry Methods
 
 ### `get_pool(uint64, uint64) → uint64`
 
 Reads the pair registry box and returns the pool app ID.
 
-### `register_pool_lps(pay, uint64) → void`
-
-Writes 6 reverse LP boxes for a pool. Permissionless.
-
-- **Seed payment**: Minimum 140,000 µALGO covering box MBR
-- **Transaction requirements**: 6 box references (`"l" + itob(lp_id)` per tier), pool app in foreign apps
-- **Checks**: Factory created the pool, pool not already registered
-- **Side effect**: Sets `registered = 1` on the pool via inner app call
-
 ### `get_lp_info(uint64) → byte[]`
 
 Reads a reverse LP box and returns 32 bytes of context.
+
+### `register_pair(uint64, uint64, uint64) → void`
+
+Writes a pair registry box. Writer-only (called by the factory via inner transaction).
+
+### `register_lps(application) → void`
+
+Writes 6 reverse LP boxes for a pool. Writer-only. Verifies the pool's creator matches the writer.
 
 ---
 
@@ -162,7 +175,7 @@ Reads a reverse LP box and returns 32 bytes of context.
 | Reverse LP | 6 | 2,500 + 400 × 41 = 18,900 | 113,400 |
 | **Total** | **7** | | **125,900** |
 
-Pair box MBR is covered by `MIN_SEED_CREATE_POOL`. Reverse LP box MBR is covered by `MIN_SEED_REGISTER_LPS` (140,000 µALGO).
+Pair box MBR is covered by `MIN_SEED_CREATE_POOL` (forwarded from factory to registry). Reverse LP box MBR is covered by `MIN_SEED_REGISTER_LPS` (150,000 µALGO, forwarded from factory to registry).
 
 ---
 
@@ -171,18 +184,18 @@ Pair box MBR is covered by `MIN_SEED_CREATE_POOL`. Reverse LP box MBR is covered
 ### Look up pool by pair
 
 ```python
-from stamm.factory import get_pool_app_id
+from stamm.registry import get_pool_app_id
 
-pool_id = get_pool_app_id(algod, factory_app_id, asset_a_id, asset_b_id)
+pool_id = get_pool_app_id(algod, registry_app_id, asset_a_id, asset_b_id)
 # Returns int or None
 ```
 
 ### Look up LP token context
 
 ```python
-from stamm.factory import get_lp_info
+from stamm.registry import get_lp_info
 
-info = get_lp_info(algod, factory_app_id, lp_asset_id)
+info = get_lp_info(algod, registry_app_id, lp_asset_id)
 # Returns {"pool_app_id": int, "asset_a_id": int, "asset_b_id": int, "tier_index": int}
 # Returns None if not registered
 ```
@@ -205,14 +218,14 @@ txn_group.submit(algod)
 ```python
 import base64
 
-# Pair lookup
+# Pair lookup (read from registry contract)
 pair_key = b"p" + min(a, b).to_bytes(8, "big") + max(a, b).to_bytes(8, "big")
-box = algod.application_box_by_name(factory_app_id, pair_key)
+box = algod.application_box_by_name(registry_app_id, pair_key)
 pool_app_id = int.from_bytes(base64.b64decode(box["value"]), "big")
 
-# LP lookup
+# LP lookup (read from registry contract)
 lp_key = b"l" + lp_asset_id.to_bytes(8, "big")
-box = algod.application_box_by_name(factory_app_id, lp_key)
+box = algod.application_box_by_name(registry_app_id, lp_key)
 value = base64.b64decode(box["value"])
 pool_app_id = int.from_bytes(value[0:8], "big")
 asset_a_id  = int.from_bytes(value[8:16], "big")

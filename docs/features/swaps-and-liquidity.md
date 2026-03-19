@@ -12,7 +12,7 @@ A standard swap executes entirely on one tier. The trader sends one asset and re
 
 **Flow:**
 1. Trader sends Asset A (or B) to the pool contract. For ALGO pools, sending ALGO uses a Payment transaction; sending ASAs uses an AssetTransfer.
-2. Contract applies the two-sided fee: half deducted from input, half from output
+2. Contract applies the [two-sided fee](fee-engine.md#1-two-sided-fee): half deducted from input, half from output
 3. Constant-product formula determines the raw output on the chosen tier
 4. Protocol fees from both sides are redistributed inline via spill
 5. Output asset (minus output fee) is sent to the trader. ALGO outputs use Payment; ASA outputs use AssetTransfer.
@@ -41,9 +41,9 @@ A price-limited swap (`swap_limit`) executes as much of the input as possible wi
 - DeFi composability — other contracts can call `swap_limit` for rate-bounded execution without off-chain precomputation
 
 **Key properties:**
-- The price limit refers to the pool's post-swap **marginal price**, not the user's effective rate. Fees cause the effective rate to be slightly worse than the marginal price, as with any AMM swap
+- The contract adjusts the stated price limit for fee impact, so the result approximates an effective rate guarantee. The post-swap marginal price will be at or slightly above the adjusted limit
 - Uses 128-bit square root (`sqrt128`) and wide math internally; requires an OpUp budget call
-- If the current pool price is already at or below the limit, the transaction reverts (`"price at limit"`)
+- If the current pool price is already at or below the limit, the transaction reverts (`"price already at limit"`)
 
 ### Smart-Routed Swap
 
@@ -66,6 +66,26 @@ A smart-routed swap (`swap_smart`) automatically routes a trade across up to 3 t
 - `min_output` slippage protection applies to the combined output
 - Routing table is updated after every state-changing operation (swaps, mints, burns)
 - Uses wide math for capacity calculation (`sqrt128`, `safe_mul_div`)
+
+### Caller-Directed Routed Swap
+
+A caller-directed routed swap (`swap_routed`) lets the caller specify explicit (tier, amount) legs computed off-chain. This bypasses the on-chain routing table and enables custom routing strategies beyond the automatic 3-tier waterfall.
+
+**Flow:**
+1. Trader sends input tokens and provides packed routing legs: N × 9 bytes (1 byte tier index + 8 bytes amount per leg)
+2. Supports 1 to 6 legs. Each leg specifies a tier and the amount to route through it
+3. The sum of all leg amounts must exactly equal the deposited input
+4. Each leg executes independently: constant-product swap with two-sided fee, k-growth assertion, and reserve update
+5. After all legs execute, aggregate slippage is checked once against `min_output`
+6. A single inline spill redistributes combined protocol fees from all legs
+7. Routing table entries are updated once for all affected tiers
+8. Total output from all legs is sent to the trader
+
+**Key properties:**
+- Requires an OpUp budget call (budget 5600 for 6-leg worst case)
+- Gives callers full control over routing — useful for MEV-aware strategies, custom aggregators, and off-chain optimizers
+- Same fee, spill, and k-growth guarantees as standard swaps
+- `min_output` slippage protection applies to the combined output
 
 ---
 
@@ -118,6 +138,7 @@ The SDK handles this automatically — callers specify asset IDs and amounts, an
 | Swap | 1 | 1 | Yes (two-sided) | No |
 | Swap (limit) | 1 | 1 + refund | Yes (two-sided) | No |
 | Swap (smart) | 1 | 1 | Yes (two-sided, per tier) | No |
+| Swap (routed) | 1 | 1 | Yes (two-sided, per leg) | No |
 | Mint (balanced) | 2 | LP + refund | No | Yes |
 | Mint (hybrid) | 2 | LP + residual | On excess swap | No |
 | Mint (single-sided) | 1 (+ 0) | LP + residual | On swap portion | No |
@@ -133,6 +154,7 @@ All user-facing operations include slippage parameters:
 - **Swaps**: `min_output` — minimum output tokens
 - **Price-limited swaps**: `min_output` — minimum output tokens (in addition to the price limit)
 - **Smart-routed swaps**: `min_output` — minimum combined output from all tiers
+- **Caller-directed routed swaps**: `min_output` — minimum combined output from all legs
 - **Mints**: `min_lp_out` — minimum LP tokens to receive
 - **Burns**: `min_a_out` / `min_b_out` — minimum per-asset output (used for both proportional and single-sided modes)
 

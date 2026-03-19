@@ -182,7 +182,7 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 **Scenario**:
 1. Tier in bootstrap state (total_lp = 1)
 2. User attempts single-sided mint
-3. Transaction reverts: `"tier in bootstrap"`
+3. Transaction reverts: `"bootstrap needs both"`
 
 **Assertions**:
 - No established ratio to target in bootstrap state

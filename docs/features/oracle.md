@@ -8,7 +8,7 @@ STAMM includes an inline time-weighted average price (TWAP) oracle that updates 
 
 ### Aggregate Price
 
-Unlike single-pool AMMs where the oracle reflects one set of reserves, STAMM's oracle uses **aggregate reserves across all active tiers**. This means the reported price is a liquidity-weighted average, making it harder to manipulate by targeting a single low-liquidity tier.
+Unlike single-pool AMMs where the oracle reflects one set of reserves, STAMM’s oracle uses **aggregate reserves across all active tiers** (see [Architecture — Pool State](../core/architecture.md#pool-state-global)). This means the reported price is a liquidity-weighted average, making it harder to manipulate by targeting a single low-liquidity tier.
 
 The aggregate reserves (`agg_ra`, `agg_rb`) are maintained incrementally — updated on every tier state change — so the oracle never needs to loop over tiers.
 
@@ -26,12 +26,12 @@ The oracle maintains two 256-bit accumulators (each split into four uint64 words
 On each update:
 1. Compute `elapsed = current_timestamp - last_timestamp`
 2. If elapsed > 0 and reserves are non-zero:
-   - Calculate current price of A in terms of B using aggregate reserves with fixed-point scaling
-   - Calculate current price of B in terms of A using aggregate reserves with fixed-point scaling
+   - Calculate current price of A in terms of B: `price_a = agg_rb × 2^32 / agg_ra`
+   - Calculate current price of B in terms of A: `price_b = agg_ra × 2^32 / agg_rb`
    - Add `price × elapsed` to respective accumulators (256-bit addition with full carry propagation across all 4 words)
 3. Update `last_timestamp`
 
-The fixed-point scaling provides sufficient precision for price ratios while keeping arithmetic within AVM capabilities.
+The scale factor is 2^32 (4,294,967,296). This fixed-point scaling provides sufficient precision for price ratios while keeping arithmetic within AVM capabilities.
 
 ---
 
@@ -56,8 +56,9 @@ To compute TWAP over a time window:
 
 1. Read accumulators at time `t1` -> `(ca1_hi, ca1_lo, cb1_hi, cb1_lo, ts1)`
 2. Read accumulators at time `t2` -> `(ca2_hi, ca2_lo, cb2_hi, cb2_lo, ts2)`
-3. Compute time-weighted average by dividing the accumulator delta by the time delta
-4. Apply inverse fixed-point scaling to get human-readable prices
+3. Compute delta: `delta_a = ca2 - ca1` (256-bit subtraction)
+4. Divide by time: `twap_a_scaled = delta_a / (ts2 - ts1)`
+5. Remove scaling: `twap_a = twap_a_scaled / 2^32` to get human-readable price
 
 **Recommended minimum window: 30 minutes.** Shorter windows are more susceptible to manipulation via flash-loan-style attacks within a single block.
 

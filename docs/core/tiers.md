@@ -22,7 +22,7 @@ Every pool is created with all 6 tiers. LP tokens for all 6 are created during b
 | Tier 2 | 2 | 0.3% (30 bps) | Default | Medium-fee trading |
 | Tier 3 | 3 | 1% (100 bps) | Default | Volatile pairs |
 | Tier 4 | 4 | 3% (300 bps) | `seed_tier` | High-fee passive LP |
-| Tier P | 5 | ~0.0001% (1 ppm) | Default | Protocol backstop |
+| Tier P | 5 | ~1 ppm (0.0001%) | Default | Protocol backstop |
 
 ## Tier Index Range
 
@@ -35,7 +35,7 @@ Every pool is created with all 6 tiers. LP tokens for all 6 are created during b
 
 Tier P is a special tier at index 5 with unique properties:
 
-- **Near-zero fee**: 1 part per million (0.0001%), calculated as `max(1, amount / 1,000,000)`
+- **Near-zero fee**: ~1 part per million (0.0001%), calculated as `max(1, amount / 1,000,000)` — the floor makes the effective rate higher for small amounts
 - **No protocol fee extraction**: 100% of fees stay in the tier's reserves
 - **Inline spill recipient**: Receives 10% of protocol fees from every swap via the inline spill mechanism
 - **Backstop role**: Provides deep, low-cost liquidity as a baseline
@@ -76,7 +76,7 @@ Tier active states are packed into a single `tier_mask` bitmask (uint64). Bit `i
 
 ## Inline Spill Targeting
 
-The protocol identifies the two weakest standard tiers (lowest k-values) inline during each swap via an O(5) scan of active standard tiers (0-4). These tiers receive the majority of protocol fee redistribution via inline spill (55% to the weakest, 35% to the second weakest). The tier being operated on is excluded from the scan to prevent state conflicts.
+The protocol identifies the two weakest standard tiers (lowest k-values) inline during each swap. The scan covers all active tiers (excluding the current tier), with only standard tiers (0-4) eligible as weakest/second-weakest recipients. These tiers receive the majority of protocol fee redistribution via [inline spill](../features/fee-engine.md#3-inline-spill) (55% to the weakest, 35% to the second weakest).
 
 ## How Traders Choose a Tier
 
@@ -85,7 +85,7 @@ From a trader's perspective, the choice is straightforward:
 - **Small trades**: Use the lowest-fee tier with sufficient liquidity
 - **Large trades**: Use a tier with deep enough reserves to handle the trade without excessive slippage
 - **Price-sensitive trades**: Compare output across tiers and pick the best one
-- **Automatic**: Use the smart-routed swap (`swap_smart`), which auto-routes across up to 3 tiers using waterfall routing for optimal execution
+- **Automatic**: Use the [smart-routed swap](../features/swaps-and-liquidity.md#smart-routed-swap) (`swap_smart`), which auto-routes across up to 3 tiers using waterfall routing for optimal execution
 
 Frontend applications and SDKs can automate tier comparison. For manual tier selection, each swap executes on exactly one tier. The `swap_smart` method handles multi-tier routing automatically.
 

@@ -13,6 +13,7 @@ All notable changes to the STAMM protocol will be documented here.
 - Standard swap with slippage protection and k-invariant enforcement
 - Price-limited swap (`swap_limit`) with partial execution and atomic refund
 - Smart-routed swap (`swap_smart`) with waterfall routing across up to 3 tiers
+- Caller-directed routed swap (`swap_routed`) with 1-6 explicit (tier, amount) legs packed as N×9 bytes
 - Unified `mint` supporting balanced, hybrid (swap excess + mint), and single-sided (optimal swap split via 128-bit sqrt) modes
 - Unified `burn` supporting proportional and single-sided (burn + internal swap) modes via `output_asset` parameter
 - Bitmask-based tier active tracking (`tier_mask`)
@@ -46,13 +47,33 @@ All notable changes to the STAMM protocol will be documented here.
 - 128-bit cumulative volume counters for both assets (`vol_a_hi/lo`, `vol_b_hi/lo`)
 
 ### Architecture
+
+#### Contracts
+- Four-contract architecture: PoolFactory, AdminContract, RegistryContract, and TieredAMM pools
+- PoolFactory as lightweight deployment tool — deploys pools then transfers governor to admin contract
 - PoolFactory with configurable creation mode (paused, admin-only, or permissionless)
-- One pool per asset pair (enforced via box storage registry)
-- Reverse LP registry: factory box storage maps any LP asset ID to its pool, pair, and tier
-- Two-step pool creation: create_pool -> register_pool_lps -> seed_and_mint
+
+#### Admin Contract
+- AdminContract as permanent pool governor with treasury withdrawal proxy methods (`withdraw_pool_lp`, `withdraw_pool_assets`)
+- AdminContract 72-hour timelock (259,200 seconds) on admin transfer (`propose_admin` → `accept_admin`)
+- AdminContract freeze: 72-hour timelock, irreversible, blocks update/delete but not treasury or admin transfer
+- AdminContract governor migration: move pools to a new governor with 72-hour timelock (`propose_migration` → `confirm_pool_migration`, per-pool)
+
+#### Registry Contract
+- RegistryContract: permanent on-chain registry for pair→pool and LP→pool discovery
+- Registry stores pair and LP boxes (moved out of factory); survives factory replacement
+- Registry freeze: permanent/irreversible, blocks all writes; reads remain functional
+- Registry writer authorization: only the factory (writer) can register new data
+- One pool per asset pair (enforced via registry box storage)
+- Reverse LP registry: registry box storage maps any LP asset ID to its pool, pair, and tier
+
+#### Factory
+- Factory 7-day timelock (604,800 seconds) on admin transfer, admin contract changes, registry changes, and unfreeze
+- Factory freeze system: instant freeze blocks template/update/delete; 7-day timelock to unfreeze
+
+#### Pool Setup
+- Two-step pool creation (create_pool → register_pool_lps), followed by seed_and_mint for initial liquidity
 - `registered` flag gates seed_and_mint (ensures LP boxes are written before liquidity)
-- Two-step admin transfer: `propose_admin` -> `accept_admin` (with `cancel_admin_proposal`)
-- Factory verifies pool ownership on all proxy operations
 - Seed payment sender validation on pool/tier creation
 
 ### Optimizations

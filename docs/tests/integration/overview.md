@@ -20,7 +20,7 @@ Integration tests validate end-to-end protocol behavior on a live AlgoKit LocalN
 2. **Factory Deployment**: Compile and deploy PoolFactory contract
 3. **Pool Creation**: Deploy TieredAMM instance for test asset pair
 4. **Bootstrap**: Opt into assets, create all 6 LP tokens with fee rates
-5. **LP Box Registration**: Register reverse LP lookup boxes on factory
+5. **LP Box Registration**: Register reverse LP lookup boxes on registry contract
 6. **Initial Liquidity**: Seed default tiers and add first real liquidity
 
 ### Test Execution

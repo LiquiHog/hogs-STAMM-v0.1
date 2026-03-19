@@ -26,8 +26,14 @@ Key protocol mechanisms and operations
 Technical details and supporting documentation
 
 - **[Glossary](reference/glossary.md)** — Term definitions and abbreviations
-- **[Indexing](reference/indexing.md)** — Event indexing and off-chain data access
+- **[Indexing](reference/indexing.md)** — On-chain registry lookups for pools, assets, and LP tokens
 - **[Security](reference/security.md)** — Access control, invariants, attack vectors
+- **[Admin Contract](reference/admin-contract.md)** — Governor lifecycle, timelocks, freeze, migration, treasury
+- **[Registry Contract](reference/registry-contract.md)** — Pair/LP registries, writer authorization, permanence
+
+### Governance
+
+- **[Governance](core/governance.md)** — Timelocks, freeze mechanisms, admin transfer, governor migration
 
 ### Testing
 

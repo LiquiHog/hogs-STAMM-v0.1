@@ -20,7 +20,7 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 **Assertions**:
 - Output amount > 0
 - Output amount >= `min_output` (slippage protection)
-- Post-swap k ≥ pre-swap k (fee capture grows reserves)
+- Post-swap k > pre-swap k (fee floors guarantee strict growth)
 - User balance changes match expected deltas
 - Tier reserves updated correctly
 
@@ -317,11 +317,112 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 
 ---
 
+## Smart-Routed Swap Tests
+
+### Single-Tier Fallback
+
+**Test**: `swap_smart` routes entirely to best tier when input fits within capacity
+
+**Scenario**:
+1. Two active tiers with different liquidity depths
+2. Small swap where best tier can absorb entire input
+3. Verify 100% routes to highest-scored tier
+
+**Assertions**:
+- Output matches single-tier swap on best tier
+- No sub-swaps to secondary tiers
+- RT box scores correctly identify best tier
+
+---
+
+### Two-Tier Waterfall
+
+**Test**: `swap_smart` splits across two tiers when input exceeds best tier's capacity
+
+**Scenario**:
+1. Three active tiers with varying liquidity
+2. Swap large enough to exceed best tier's equalization capacity
+3. Capacity routes to best tier, remainder to second-best
+
+**Assertions**:
+- First tier receives exactly the waterfall capacity amount
+- Remainder routes to second-best tier
+- Combined output > what either tier alone would produce
+- Both sub-swaps independently enforce k-growth and fees
+
+---
+
+### Three-Tier Split
+
+**Test**: `swap_smart` uses three tiers for very large input
+
+**Scenario**:
+1. Multiple active tiers with moderate liquidity
+2. Input exceeds two-tier equalization capacity
+3. Three-tier proportional split used for the overflow
+
+**Assertions**:
+- Three tiers receive sub-swaps
+- Fee-adjusted proportional weighting applied
+- Total output optimized across all three tiers
+- Each sub-swap applies full two-sided fee and inline spill
+
+---
+
+## Caller-Directed Routed Swap Tests
+
+### Single-Leg Routing
+
+**Test**: `swap_routed` with one explicit (tier, amount) leg
+
+**Scenario**:
+1. Caller provides 1 leg: (tier=2, amount=1,000,000)
+2. Equivalent to standard swap on Tier 2
+
+**Assertions**:
+- Output matches standard single-tier swap
+- Leg encoding correctly parsed (9 bytes: 1 tier + 8 amount)
+
+---
+
+### Multi-Leg Routing
+
+**Test**: `swap_routed` with 3 explicit legs across different tiers
+
+**Scenario**:
+1. Caller provides 3 legs computed off-chain
+2. Each leg targets a different tier with a specific amount
+3. All legs execute sequentially in a single transaction
+
+**Assertions**:
+- Sum of leg amounts equals total input
+- Each tier receives exactly its specified amount
+- Each sub-swap applies full fees independently
+- Combined output reflects all leg executions
+
+---
+
+### Leg Sum Validation
+
+**Test**: `swap_routed` rejects if leg amounts don't match input
+
+**Scenario**:
+1. Caller sends 1,000,000 input but legs sum to 900,000
+2. Transaction reverts
+
+**Assertions**:
+- Input validation enforced
+- No partial execution or leftover funds
+
+---
+
 ## Test Results
 
 ✅ **All trading operation tests passed**, confirming:
 - Standard swaps execute correctly on all tiers
 - Price-limited swaps refund unused input atomically
+- Smart-routed swaps optimally split across up to 3 tiers
+- Caller-directed routed swaps execute explicit multi-leg strategies
 - Slippage protection enforced for all swap types
 - Multi-tier routing works independently
 - ALGO and ASA pools handle transactions correctly
