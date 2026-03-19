@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 370" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#b0b8c4"/>
+    </marker>
+    <filter id="ds"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <rect width="560" height="370" rx="10" fill="#f7f8fa"/>
+
+  <text x="280" y="22" text-anchor="middle" fill="#999" font-size="11" font-weight="500" letter-spacing="1">MINT MODES</text>
+
+  <!-- Entry -->
+  <rect x="120" y="36" width="320" height="48" rx="24" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="280" y="56" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">mint( deposit_a, deposit_b )</text>
+  <text x="280" y="72" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">contract auto-detects mode from deposit amounts</text>
+
+  <!-- Vertical line down to horizontal bar -->
+  <line x1="280" y1="84" x2="280" y2="108" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- Horizontal bar -->
+  <line x1="72" y1="108" x2="488" y2="108" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- 4 drops -->
+  <line x1="72" y1="108" x2="72" y2="128" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="210" y1="108" x2="210" y2="128" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="350" y1="108" x2="350" y2="128" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="488" y1="108" x2="488" y2="128" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Bootstrap -->
+  <rect x="16" y="134" width="112" height="120" rx="8" fill="#c9a227" filter="url(#ds)"/>
+  <text x="72" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Bootstrap</text>
+  <line x1="36" y1="166" x2="108" y2="166" stroke="#f0e6c0" stroke-width="0.5"/>
+  <text x="72" y="184" text-anchor="middle" fill="#f0e6c0" font-size="10">first deposit to</text>
+  <text x="72" y="198" text-anchor="middle" fill="#f0e6c0" font-size="10">a seeded tier</text>
+  <text x="72" y="216" text-anchor="middle" fill="#f0e6c0" font-size="10">any ratio accepted</text>
+  <text x="72" y="230" text-anchor="middle" fill="#f0e6c0" font-size="10">sets the initial price</text>
+  <text x="72" y="244" text-anchor="middle" fill="#f0e6c0" font-size="10">no swap fee</text>
+
+  <!-- Balanced -->
+  <rect x="154" y="134" width="112" height="120" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="210" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Balanced</text>
+  <line x1="174" y1="166" x2="246" y2="166" stroke="#d0e0d4" stroke-width="0.5"/>
+  <text x="210" y="184" text-anchor="middle" fill="#d0e0d4" font-size="10">both assets match</text>
+  <text x="210" y="198" text-anchor="middle" fill="#d0e0d4" font-size="10">current pool ratio</text>
+  <text x="210" y="216" text-anchor="middle" fill="#d0e0d4" font-size="10">no swap fee</text>
+  <text x="210" y="230" text-anchor="middle" fill="#d0e0d4" font-size="10">any slight excess</text>
+  <text x="210" y="244" text-anchor="middle" fill="#d0e0d4" font-size="10">refunded to trader</text>
+
+  <!-- Hybrid -->
+  <rect x="294" y="134" width="112" height="120" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="350" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Hybrid</text>
+  <line x1="314" y1="166" x2="386" y2="166" stroke="#d0e0d4" stroke-width="0.5"/>
+  <text x="350" y="184" text-anchor="middle" fill="#d0e0d4" font-size="10">both assets but</text>
+  <text x="350" y="198" text-anchor="middle" fill="#d0e0d4" font-size="10">off-ratio amounts</text>
+  <text x="350" y="216" text-anchor="middle" fill="#d0e0d4" font-size="10">balanced part is free</text>
+  <text x="350" y="230" text-anchor="middle" fill="#d0e0d4" font-size="10">excess is swapped</text>
+  <text x="350" y="244" text-anchor="middle" fill="#d0e0d4" font-size="10">fee on swap part</text>
+
+  <!-- Single-Sided -->
+  <rect x="432" y="134" width="112" height="120" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="488" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Single-Sided</text>
+  <line x1="452" y1="166" x2="524" y2="166" stroke="#d0e0d4" stroke-width="0.5"/>
+  <text x="488" y="184" text-anchor="middle" fill="#d0e0d4" font-size="10">one asset only</text>
+  <text x="488" y="198" text-anchor="middle" fill="#d0e0d4" font-size="10">(deposit_b = 0)</text>
+  <text x="488" y="216" text-anchor="middle" fill="#d0e0d4" font-size="10">optimal split into</text>
+  <text x="488" y="230" text-anchor="middle" fill="#d0e0d4" font-size="10">both sides by swap</text>
+  <text x="488" y="244" text-anchor="middle" fill="#d0e0d4" font-size="10">fee on swap part</text>
+
+  <!-- Converge -->
+  <line x1="72" y1="254" x2="72" y2="276" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="210" y1="254" x2="210" y2="276" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="350" y1="254" x2="350" y2="276" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="488" y1="254" x2="488" y2="276" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="72" y1="276" x2="488" y2="276" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="280" y1="276" x2="280" y2="296" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Output -->
+  <rect x="140" y="302" width="280" height="32" rx="16" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="280" y="323" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">LP Tokens Minted to Depositor</text>
+
+  <!-- Caption -->
+  <text x="280" y="352" text-anchor="middle" fill="#999" font-size="10" font-style="italic">contract auto-detects mode · bootstrap only available for seeded (empty) tiers</text>
+</svg>

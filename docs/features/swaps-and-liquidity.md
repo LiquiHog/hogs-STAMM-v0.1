@@ -103,6 +103,8 @@ All mint and burn operations use a single unified entry point each. The contract
 
 ### Mint
 
+![Mint Modes](../assets/mint-modes.svg)
+
 A single `mint` method handles all deposit modes:
 
 - **Bootstrap mint**: First deposit into a seeded tier (k ≤ bootstrap threshold). Both assets required, any ratio accepted. The depositor sets the initial price. LP tokens minted using geometric mean (`sqrt(deposit_a × deposit_b)`).
@@ -113,6 +115,8 @@ A single `mint` method handles all deposit modes:
 The caller sends two deposits (A and B) in the same group. Either deposit may be zero for single-sided minting. For ALGO pools: Payment for A-side, AssetTransfer for B-side. Tier P is not open to public mints.
 
 ### Burn
+
+![Burn Modes](../assets/burn-modes.svg)
 
 A single `burn` method handles all withdrawal modes, selected by the `output_asset` parameter:
 

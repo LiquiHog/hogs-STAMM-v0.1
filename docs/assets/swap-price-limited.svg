@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 440" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 460" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
   <defs>
     <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#b0b8c4"/>
@@ -6,65 +6,64 @@
     <filter id="ds"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
   </defs>
 
-  <rect width="520" height="440" rx="10" fill="#f7f8fa"/>
+  <rect width="520" height="460" rx="10" fill="#f7f8fa"/>
 
   <!-- Title -->
   <text x="260" y="24" text-anchor="middle" fill="#999" font-size="11" font-weight="500" letter-spacing="1">PRICE-LIMITED SWAP</text>
 
   <!-- Input -->
-  <rect x="130" y="38" width="260" height="44" rx="22" fill="#4a6fa5" filter="url(#ds)"/>
-  <text x="260" y="57" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Trader sends input + price limit</text>
-  <text x="260" y="72" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">price_num / price_den</text>
+  <rect x="110" y="38" width="300" height="48" rx="24" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="260" y="58" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Trader sends input + price limit</text>
+  <text x="260" y="73" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">price_num / price_den</text>
 
-  <line x1="260" y1="82" x2="260" y2="112" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="260" y1="86" x2="260" y2="112" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
 
   <!-- Compute max input -->
-  <rect x="110" y="118" width="300" height="44" rx="8" fill="#5b8a72" filter="url(#ds)"/>
-  <text x="260" y="137" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Compute max input from limit</text>
-  <text x="260" y="152" text-anchor="middle" fill="#d0e0d4" font-size="10" font-style="italic">wide arithmetic + sqrt128</text>
+  <rect x="105" y="118" width="310" height="44" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="260" y="138" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Compute max input at price limit</text>
+  <text x="260" y="153" text-anchor="middle" fill="#d0e0d4" font-size="10" font-style="italic">how much can execute without breaking the limit?</text>
 
   <line x1="260" y1="162" x2="260" y2="186" stroke="#b0b8c4" stroke-width="1.5"/>
 
-  <!-- Decision diamond -->
-  <polygon points="260,186 290,210 260,234 230,210" fill="#e4e7ec" stroke="#b0b8c4" stroke-width="1.5"/>
+  <!-- Decision diamond — wider for readability -->
+  <polygon points="260,186 296,210 260,234 224,210" fill="#e4e7ec" stroke="#b0b8c4" stroke-width="1.5"/>
   <text x="260" y="213" text-anchor="middle" fill="#6a7080" font-size="10" font-weight="600">fits?</text>
 
-  <!-- YES — left branch: full swap -->
-  <line x1="230" y1="210" x2="115" y2="210" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
-  <text x="175" y="203" fill="#5b8a72" font-size="10" font-weight="600">yes</text>
+  <!-- YES branch — left -->
+  <line x1="224" y1="210" x2="156" y2="210" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="156" y1="210" x2="156" y2="258" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <rect x="136" y="196" width="68" height="16" rx="3" fill="#e8f0e8"/>
+  <text x="170" y="207" text-anchor="middle" fill="#5b8a72" font-size="10" font-weight="600">input fits</text>
 
-  <rect x="15" y="192" width="100" height="36" rx="8" fill="#5b8a72" filter="url(#ds)"/>
-  <text x="65" y="214" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Full Swap</text>
+  <!-- NO branch — right -->
+  <line x1="296" y1="210" x2="364" y2="210" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="364" y1="210" x2="364" y2="258" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <rect x="314" y="196" width="90" height="16" rx="3" fill="#f0e8e4"/>
+  <text x="359" y="207" text-anchor="middle" fill="#b05c3b" font-size="10" font-weight="600">exceeds limit</text>
 
-  <!-- Arrow from Full Swap down to output -->
-  <line x1="65" y1="228" x2="65" y2="368" stroke="#b0b8c4" stroke-width="1.5"/>
-  <line x1="65" y1="368" x2="138" y2="368" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <!-- Full Swap card -->
+  <rect x="50" y="264" width="212" height="100" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="156" y="288" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Full Swap</text>
+  <line x1="70" y1="298" x2="242" y2="298" stroke="#d0e0d4" stroke-width="0.5"/>
+  <text x="156" y="316" text-anchor="middle" fill="#d0e0d4" font-size="10">all input consumed</text>
+  <text x="156" y="332" text-anchor="middle" fill="#d0e0d4" font-size="10">fee + spill + k-growth</text>
+  <text x="156" y="348" text-anchor="middle" fill="#d0e0d4" font-size="10">no refund needed</text>
 
-  <!-- NO — down: partial swap -->
-  <line x1="260" y1="234" x2="260" y2="262" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
-  <text x="273" y="253" fill="#b05c3b" font-size="10" font-weight="600">no</text>
+  <!-- Partial Swap card -->
+  <rect x="278" y="264" width="212" height="100" rx="8" fill="#c9a227" filter="url(#ds)"/>
+  <text x="384" y="288" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Partial Swap</text>
+  <line x1="298" y1="298" x2="470" y2="298" stroke="#f0e6c0" stroke-width="0.5"/>
+  <text x="384" y="316" text-anchor="middle" fill="#f0e6c0" font-size="10">executes only up to max</text>
+  <text x="384" y="332" text-anchor="middle" fill="#f0e6c0" font-size="10">unused input refunded</text>
+  <text x="384" y="348" text-anchor="middle" fill="#f0e6c0" font-size="10">output + refund atomic</text>
 
-  <!-- Partial Swap -->
-  <rect x="135" y="268" width="250" height="40" rx="8" fill="#c9a227" filter="url(#ds)"/>
-  <text x="260" y="293" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Partial Swap (dx_max)</text>
-
-  <line x1="260" y1="308" x2="260" y2="326" stroke="#b0b8c4" stroke-width="1.5"/>
-
-  <!-- Horizontal split -->
-  <line x1="200" y1="326" x2="370" y2="326" stroke="#b0b8c4" stroke-width="1.5"/>
-  <line x1="200" y1="326" x2="200" y2="348" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
-  <line x1="370" y1="326" x2="370" y2="348" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
-
-  <!-- Refund -->
-  <rect x="325" y="354" width="140" height="36" rx="8" fill="#b05c3b" filter="url(#ds)"/>
-  <text x="395" y="372" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Refund remainder</text>
-  <text x="395" y="385" text-anchor="middle" fill="#e0c8c0" font-size="10" font-style="italic">atomic</text>
+  <!-- Converge -->
+  <line x1="156" y1="364" x2="156" y2="392" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="384" y1="364" x2="384" y2="392" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="156" y1="392" x2="384" y2="392" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="260" y1="392" x2="260" y2="416" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
 
   <!-- Output -->
-  <rect x="145" y="354" width="160" height="36" rx="8" fill="#5b8a72" filter="url(#ds)"/>
-  <text x="225" y="372" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Swap Output</text>
-  <text x="225" y="385" text-anchor="middle" fill="#d0e0d4" font-size="10" font-style="italic">≥ min_output</text>
-
-  <!-- Combined label -->
-  <text x="260" y="425" text-anchor="middle" fill="#999" font-size="11" font-style="italic">Trader receives output + any refund atomically</text>
+  <rect x="105" y="422" width="310" height="32" rx="16" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="260" y="443" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Trader receives output ≥ min_output</text>
 </svg>

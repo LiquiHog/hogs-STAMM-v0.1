@@ -44,6 +44,8 @@ Tier P is protocol-managed — it is not open to public LPs. Its liquidity is bu
 
 ## Tier Lifecycle
 
+![Tier Lifecycle](../assets/tier-lifecycle.svg)
+
 ### Seeding
 
 A tier is seeded with 1 microunit of each asset (reserve_a = 1, reserve_b = 1, total_lp = 1). The 1 LP token is locked in the pool permanently. Seeding marks the tier as existing but not yet active for trading.

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 370" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#b0b8c4"/>
+    </marker>
+    <filter id="ds"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <rect width="520" height="370" rx="10" fill="#f7f8fa"/>
+
+  <text x="260" y="22" text-anchor="middle" fill="#999" font-size="11" font-weight="500" letter-spacing="1">BURN MODES</text>
+
+  <!-- Entry -->
+  <rect x="85" y="36" width="350" height="48" rx="24" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="260" y="56" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">burn( lp_amount, output_asset )</text>
+  <text x="260" y="72" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">output_asset controls which mode is used</text>
+
+  <!-- Vertical line down to horizontal bar -->
+  <line x1="260" y1="84" x2="260" y2="108" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- Horizontal bar -->
+  <line x1="88" y1="108" x2="432" y2="108" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- 3 drops -->
+  <line x1="88" y1="108" x2="88" y2="128" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="260" y1="108" x2="260" y2="128" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="432" y1="108" x2="432" y2="128" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Proportional -->
+  <rect x="22" y="134" width="132" height="120" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="88" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Proportional</text>
+  <line x1="42" y1="166" x2="134" y2="166" stroke="#d0e0d4" stroke-width="0.5"/>
+  <text x="88" y="184" text-anchor="middle" fill="#d0e0d4" font-size="10">output_asset = 0</text>
+  <text x="88" y="200" text-anchor="middle" fill="#d0e0d4" font-size="10">returns both A + B</text>
+  <text x="88" y="216" text-anchor="middle" fill="#d0e0d4" font-size="10">at current pool ratio</text>
+  <text x="88" y="232" text-anchor="middle" fill="#d0e0d4" font-size="10">no swap fee</text>
+  <text x="88" y="246" text-anchor="middle" fill="#d0e0d4" font-size="10">always available</text>
+
+  <!-- Single to A -->
+  <rect x="194" y="134" width="132" height="120" rx="8" fill="#c9a227" filter="url(#ds)"/>
+  <text x="260" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Single → A</text>
+  <line x1="214" y1="166" x2="306" y2="166" stroke="#f0e6c0" stroke-width="0.5"/>
+  <text x="260" y="184" text-anchor="middle" fill="#f0e6c0" font-size="10">output_asset = asset A</text>
+  <text x="260" y="200" text-anchor="middle" fill="#f0e6c0" font-size="10">burn proportionally</text>
+  <text x="260" y="216" text-anchor="middle" fill="#f0e6c0" font-size="10">then swap B → A</text>
+  <text x="260" y="232" text-anchor="middle" fill="#f0e6c0" font-size="10">to return only A</text>
+  <text x="260" y="246" text-anchor="middle" fill="#f0e6c0" font-size="10">fee on swap part</text>
+
+  <!-- Single to B -->
+  <rect x="366" y="134" width="132" height="120" rx="8" fill="#c9a227" filter="url(#ds)"/>
+  <text x="432" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Single → B</text>
+  <line x1="386" y1="166" x2="478" y2="166" stroke="#f0e6c0" stroke-width="0.5"/>
+  <text x="432" y="184" text-anchor="middle" fill="#f0e6c0" font-size="10">output_asset = asset B</text>
+  <text x="432" y="200" text-anchor="middle" fill="#f0e6c0" font-size="10">burn proportionally</text>
+  <text x="432" y="216" text-anchor="middle" fill="#f0e6c0" font-size="10">then swap A → B</text>
+  <text x="432" y="232" text-anchor="middle" fill="#f0e6c0" font-size="10">to return only B</text>
+  <text x="432" y="246" text-anchor="middle" fill="#f0e6c0" font-size="10">fee on swap part</text>
+
+  <!-- Converge -->
+  <line x1="88" y1="254" x2="88" y2="276" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="260" y1="254" x2="260" y2="276" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="432" y1="254" x2="432" y2="276" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="88" y1="276" x2="432" y2="276" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="260" y1="276" x2="260" y2="296" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Output -->
+  <rect x="115" y="302" width="290" height="32" rx="16" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="260" y="323" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Assets Returned to Trader</text>
+
+  <!-- Caption -->
+  <text x="260" y="352" text-anchor="middle" fill="#999" font-size="10" font-style="italic">proportional is always fee-free · single-asset modes incur a swap fee on the converted portion</text>
+</svg>
