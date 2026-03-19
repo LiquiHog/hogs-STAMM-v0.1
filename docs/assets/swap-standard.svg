@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 440" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#b0b8c4"/>
+    </marker>
+    <filter id="ds"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <rect width="480" height="440" rx="10" fill="#f7f8fa"/>
+
+  <!-- Title -->
+  <text x="240" y="24" text-anchor="middle" fill="#999" font-size="11" font-weight="500" letter-spacing="1">STANDARD SWAP</text>
+
+  <!-- Trader sends input -->
+  <rect x="140" y="38" width="200" height="44" rx="22" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="240" y="65" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">Trader sends Asset A</text>
+
+  <line x1="240" y1="82" x2="240" y2="108" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Two-Sided Fee -->
+  <rect x="115" y="114" width="250" height="44" rx="8" fill="#c9a227" filter="url(#ds)"/>
+  <text x="240" y="133" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Two-Sided Fee</text>
+  <text x="240" y="148" text-anchor="middle" fill="#f0e6c0" font-size="10" font-style="italic">deducted from input &amp; output</text>
+
+  <line x1="240" y1="158" x2="240" y2="184" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Constant Product on Tier -->
+  <rect x="115" y="190" width="250" height="44" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="240" y="209" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Constant-Product Formula</text>
+  <text x="240" y="224" text-anchor="middle" fill="#d0e0d4" font-size="10" font-style="italic">single tier, k must grow</text>
+
+  <!-- Fork: 80% stays, 20% spills -->
+  <line x1="240" y1="234" x2="240" y2="254" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- 80/20 diamond -->
+  <polygon points="240,254 256,268 240,282 224,268" fill="#e4e7ec" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- 20% right → Inline Spill -->
+  <line x1="256" y1="268" x2="345" y2="268" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <text x="298" y="261" fill="#a0a8b4" font-size="10" font-weight="500">20 % fee</text>
+
+  <rect x="351" y="252" width="110" height="32" rx="6" fill="#c9a227" filter="url(#ds)" opacity="0.7"/>
+  <text x="406" y="273" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Inline Spill</text>
+
+  <!-- 80% label -->
+  <text x="215" y="296" fill="#a0a8b4" font-size="10" font-weight="500">80 %</text>
+
+  <!-- continue down -->
+  <line x1="240" y1="282" x2="240" y2="310" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Tier Reserves Updated -->
+  <rect x="115" y="316" width="250" height="40" rx="8" fill="#5b8a72" filter="url(#ds)" opacity="0.7"/>
+  <text x="240" y="341" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Tier Reserves Updated</text>
+
+  <line x1="240" y1="356" x2="240" y2="378" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Output -->
+  <rect x="140" y="384" width="200" height="44" rx="22" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="240" y="404" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Trader receives Asset B</text>
+  <text x="240" y="418" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">≥ min_output</text>
+</svg>

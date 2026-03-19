@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 440" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#b0b8c4"/>
+    </marker>
+    <filter id="ds"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <rect width="520" height="440" rx="10" fill="#f7f8fa"/>
+
+  <!-- Title -->
+  <text x="260" y="24" text-anchor="middle" fill="#999" font-size="11" font-weight="500" letter-spacing="1">PRICE-LIMITED SWAP</text>
+
+  <!-- Input -->
+  <rect x="130" y="38" width="260" height="44" rx="22" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="260" y="57" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Trader sends input + price limit</text>
+  <text x="260" y="72" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">price_num / price_den</text>
+
+  <line x1="260" y1="82" x2="260" y2="112" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Compute max input -->
+  <rect x="110" y="118" width="300" height="44" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="260" y="137" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Compute max input from limit</text>
+  <text x="260" y="152" text-anchor="middle" fill="#d0e0d4" font-size="10" font-style="italic">wide arithmetic + sqrt128</text>
+
+  <line x1="260" y1="162" x2="260" y2="186" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- Decision diamond -->
+  <polygon points="260,186 290,210 260,234 230,210" fill="#e4e7ec" stroke="#b0b8c4" stroke-width="1.5"/>
+  <text x="260" y="213" text-anchor="middle" fill="#6a7080" font-size="10" font-weight="600">fits?</text>
+
+  <!-- YES — left branch: full swap -->
+  <line x1="230" y1="210" x2="115" y2="210" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <text x="175" y="203" fill="#5b8a72" font-size="10" font-weight="600">yes</text>
+
+  <rect x="15" y="192" width="100" height="36" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="65" y="214" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Full Swap</text>
+
+  <!-- Arrow from Full Swap down to output -->
+  <line x1="65" y1="228" x2="65" y2="368" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="65" y1="368" x2="138" y2="368" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- NO — down: partial swap -->
+  <line x1="260" y1="234" x2="260" y2="262" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <text x="273" y="253" fill="#b05c3b" font-size="10" font-weight="600">no</text>
+
+  <!-- Partial Swap -->
+  <rect x="135" y="268" width="250" height="40" rx="8" fill="#c9a227" filter="url(#ds)"/>
+  <text x="260" y="293" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Partial Swap (dx_max)</text>
+
+  <line x1="260" y1="308" x2="260" y2="326" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- Horizontal split -->
+  <line x1="200" y1="326" x2="370" y2="326" stroke="#b0b8c4" stroke-width="1.5"/>
+  <line x1="200" y1="326" x2="200" y2="348" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="370" y1="326" x2="370" y2="348" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Refund -->
+  <rect x="325" y="354" width="140" height="36" rx="8" fill="#b05c3b" filter="url(#ds)"/>
+  <text x="395" y="372" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Refund remainder</text>
+  <text x="395" y="385" text-anchor="middle" fill="#e0c8c0" font-size="10" font-style="italic">atomic</text>
+
+  <!-- Output -->
+  <rect x="145" y="354" width="160" height="36" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="225" y="372" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Swap Output</text>
+  <text x="225" y="385" text-anchor="middle" fill="#d0e0d4" font-size="10" font-style="italic">≥ min_output</text>
+
+  <!-- Combined label -->
+  <text x="260" y="425" text-anchor="middle" fill="#999" font-size="11" font-style="italic">Trader receives output + any refund atomically</text>
+</svg>

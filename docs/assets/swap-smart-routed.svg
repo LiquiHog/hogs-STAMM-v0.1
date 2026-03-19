@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#b0b8c4"/>
+    </marker>
+    <filter id="ds"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <rect width="520" height="520" rx="10" fill="#f7f8fa"/>
+
+  <!-- Title -->
+  <text x="260" y="24" text-anchor="middle" fill="#999" font-size="11" font-weight="500" letter-spacing="1">SMART-ROUTED SWAP</text>
+
+  <!-- Input -->
+  <rect x="130" y="38" width="260" height="44" rx="22" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="260" y="57" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Trader sends input</text>
+  <text x="260" y="72" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">no tier specified</text>
+
+  <line x1="260" y1="82" x2="260" y2="108" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Read RT Box -->
+  <rect x="130" y="114" width="260" height="44" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="260" y="133" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Read Routing Table (RT)</text>
+  <text x="260" y="148" text-anchor="middle" fill="#d0e0d4" font-size="10" font-style="italic">fee-adjusted scores per tier</text>
+
+  <line x1="260" y1="158" x2="260" y2="182" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Waterfall Routing -->
+  <rect x="105" y="188" width="310" height="40" rx="8" fill="#c9a227" filter="url(#ds)"/>
+  <text x="260" y="213" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Waterfall Capacity Check</text>
+
+  <line x1="260" y1="228" x2="260" y2="252" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- Tier allocation panel -->
+  <rect x="28" y="258" width="464" height="112" rx="10" fill="#f0ebe0" stroke="#ddd4c0" stroke-width="1"/>
+  <text x="260" y="276" text-anchor="middle" fill="#a09070" font-size="10" font-weight="500" letter-spacing="1">TIER ALLOCATION (up to 3)</text>
+
+  <!-- Three tier boxes -->
+  <rect x="42" y="286" width="138" height="70" rx="6" fill="#b05c3b" filter="url(#ds)"/>
+  <text x="111" y="308" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Best Tier</text>
+  <text x="111" y="322" text-anchor="middle" fill="#e0c8c0" font-size="10" font-style="italic">gets capacity</text>
+  <text x="111" y="346" text-anchor="middle" fill="#e0c8c0" font-size="10">or 100 % if small</text>
+
+  <rect x="191" y="286" width="138" height="70" rx="6" fill="#b05c3b" filter="url(#ds)" opacity="0.8"/>
+  <text x="260" y="308" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">2nd Best</text>
+  <text x="260" y="322" text-anchor="middle" fill="#e0c8c0" font-size="10" font-style="italic">proportional share</text>
+  <text x="260" y="346" text-anchor="middle" fill="#e0c8c0" font-size="10">of remainder</text>
+
+  <rect x="340" y="286" width="138" height="70" rx="6" fill="#b05c3b" filter="url(#ds)" opacity="0.6"/>
+  <text x="409" y="308" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">3rd Best</text>
+  <text x="409" y="322" text-anchor="middle" fill="#e0c8c0" font-size="10" font-style="italic">overflow only</text>
+  <text x="409" y="346" text-anchor="middle" fill="#e0c8c0" font-size="10">if needed</text>
+
+  <!-- Down braces / connector -->
+  <line x1="260" y1="252" x2="260" y2="258" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="260" y1="370" x2="260" y2="394" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Each sub-swap label -->
+  <rect x="105" y="400" width="310" height="40" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="260" y="420" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Each sub-swap: fee + k-growth + spill</text>
+
+  <line x1="260" y1="440" x2="260" y2="462" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Combined output -->
+  <rect x="130" y="468" width="260" height="44" rx="22" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="260" y="487" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Combined Output</text>
+  <text x="260" y="502" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">≥ min_output</text>
+</svg>

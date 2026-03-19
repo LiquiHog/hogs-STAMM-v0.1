@@ -8,6 +8,8 @@ STAMM supports multiple ways to trade and provide liquidity, all operating on a 
 
 ### Standard Swap
 
+![Standard Swap](../assets/swap-standard.svg)
+
 A standard swap executes entirely on one tier. The trader sends one asset and receives the other, minus the tier's fee.
 
 **Flow:**
@@ -24,6 +26,8 @@ A standard swap executes entirely on one tier. The trader sends one asset and re
 - Unseeded tiers cannot be swapped through
 
 ### Price-Limited Swap
+
+![Price-Limited Swap](../assets/swap-price-limited.svg)
 
 A price-limited swap (`swap_limit`) executes as much of the input as possible without pushing the pool's marginal price below a user-specified threshold. Any unused input is refunded atomically.
 
@@ -47,6 +51,8 @@ A price-limited swap (`swap_limit`) executes as much of the input as possible wi
 
 ### Smart-Routed Swap
 
+![Smart-Routed Swap](../assets/swap-smart-routed.svg)
+
 A smart-routed swap (`swap_smart`) automatically routes a trade across up to 3 tiers using waterfall routing. The caller does not need to choose a tier — the contract selects the optimal path using a pre-computed routing table (RT) box.
 
 **Flow:**
@@ -68,6 +74,8 @@ A smart-routed swap (`swap_smart`) automatically routes a trade across up to 3 t
 - Uses wide math for capacity calculation (`sqrt128`, `safe_mul_div`)
 
 ### Caller-Directed Routed Swap
+
+![Caller-Directed Routed Swap](../assets/swap-caller-routed.svg)
 
 A caller-directed routed swap (`swap_routed`) lets the caller specify explicit (tier, amount) legs computed off-chain. This bypasses the on-chain routing table and enables custom routing strategies beyond the automatic 3-tier waterfall.
 
