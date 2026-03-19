@@ -81,27 +81,21 @@ Tier P is a protocol-managed backstop tier with near-zero fees. It is not open t
 ## Architecture Overview
 
 ```
-                           ┌──────────────┐
-                           │  PoolFactory │
-                           └─────┬──┬────┘
-                                 │  │
-              ┌──────────────┘  └──────────────┐
-              │                              │
-              ▼                              ▼
-     ┌────────────────┐           ┌─────────────────┐
-     │ AdminContract  │           │ RegistryContract│
-     │  (governor)    │           │  (pair/LP boxes)│
-     └───┬────┬────┬──┘           └─────────────────┘
-         │    │    │
-         ▼    ▼    ▼
-    ┌─────┐┌─────┐┌─────┐
-    │Pool││Pool││Pool│
-    │  A ││  B ││  C │
-    └─┬──┘└─────┘└─────┘
-      │
-  ┌──┬──┬──┬──┬──┐
-  ▼  ▼  ▼  ▼  ▼  ▼
- T0 T1 T2 T3 T4 TP
+                 ┌────────────────┐
+                 │  PoolFactory   │
+                 └───────┬────────┘
+                         │
+       ┌─────────────────┼───────────────────┐
+       │                 │                   │
+       ▼                 ▼                   ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────────┐
+│AdminContract │  │  TieredAMM   │  │ RegistryContract │
+│  (governor)  │  │   (pools)    │  │ (pair/LP boxes)  │
+└──────────────┘  └──────┬───────┘  └──────────────────┘
+                         │
+                 ┌───┬───┼───┬───┬───┐
+                 ▼   ▼   ▼   ▼   ▼   ▼
+                 T0  T1  T2  T3  T4  TP
 ```
 
 Each pool is a standalone `TieredAMM` contract deployed by the `PoolFactory`. After registration, the factory transfers governor authority to the `AdminContract`, which becomes the permanent governor of all pools. Pair and LP registries live in the `RegistryContract`, which survives factory replacement. Treasury claims are stored in pool state and withdrawn by the admin contract (as governor).
