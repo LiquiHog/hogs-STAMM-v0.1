@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 630" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#b0b8c4"/>
+    </marker>
+    <filter id="ds"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <!-- Background card -->
+  <rect width="540" height="630" rx="10" fill="#f7f8fa"/>
+
+  <!-- Swap Amount -->
+  <rect x="170" y="16" width="200" height="44" rx="22" fill="#4a6fa5" filter="url(#ds)"/>
+  <text x="270" y="43" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Swap Amount</text>
+
+  <line x1="270" y1="60" x2="270" y2="82" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Two-Sided Fee -->
+  <rect x="140" y="88" width="260" height="48" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="270" y="108" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">Two-Sided Fee</text>
+  <text x="270" y="124" text-anchor="middle" fill="#d0e0d4" font-size="11" font-style="italic">on both input &amp; output</text>
+
+  <!-- Arrow to split diamond -->
+  <line x1="270" y1="136" x2="270" y2="156" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- Split diamond -->
+  <polygon points="270,156 290,174 270,192 250,174" fill="#e4e7ec" stroke="#b0b8c4" stroke-width="1.5"/>
+
+  <!-- 80% branch → right → Tier Reserves (dead end) -->
+  <line x1="290" y1="174" x2="388" y2="174" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <text x="336" y="167" fill="#a0a8b4" font-size="11" font-weight="600">80 %</text>
+
+  <rect x="394" y="154" width="130" height="40" rx="8" fill="#5b8a72" filter="url(#ds)" opacity="0.7"/>
+  <text x="459" y="170" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Tier Reserves</text>
+  <text x="459" y="184" text-anchor="middle" fill="#d0e0d4" font-size="10" font-style="italic">stays with LPs</text>
+
+  <!-- 20% branch → down → Protocol Fee -->
+  <line x1="270" y1="192" x2="270" y2="218" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+  <text x="283" y="209" fill="#a0a8b4" font-size="11" font-weight="600">20 %</text>
+
+  <!-- Protocol Fee -->
+  <rect x="140" y="224" width="260" height="44" rx="8" fill="#c9a227" filter="url(#ds)"/>
+  <text x="270" y="251" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">Protocol Fee</text>
+
+  <line x1="270" y1="268" x2="270" y2="294" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Inline Spill -->
+  <rect x="140" y="300" width="260" height="48" rx="8" fill="#c9a227" filter="url(#ds)"/>
+  <text x="270" y="320" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">Inline Spill</text>
+  <text x="270" y="336" text-anchor="middle" fill="#f0e6c0" font-size="11" font-style="italic">triggered each swap</text>
+
+  <line x1="270" y1="348" x2="270" y2="370" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Recipients panel -->
+  <rect x="28" y="376" width="484" height="80" rx="10" fill="#f0ebe0" stroke="#ddd4c0" stroke-width="1"/>
+  <text x="270" y="392" text-anchor="middle" fill="#a09070" font-size="10" font-weight="500" letter-spacing="1">SPILL RECIPIENTS</text>
+
+  <rect x="42" y="400" width="144" height="44" rx="6" fill="#b05c3b" filter="url(#ds)"/>
+  <text x="114" y="427" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">55 % → Weakest</text>
+
+  <rect x="198" y="400" width="144" height="44" rx="6" fill="#b05c3b" filter="url(#ds)"/>
+  <text x="270" y="427" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">35 % → 2nd Weak</text>
+
+  <rect x="354" y="400" width="144" height="44" rx="6" fill="#b05c3b" filter="url(#ds)"/>
+  <text x="426" y="427" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">10 % → Tier P</text>
+
+  <line x1="270" y1="456" x2="270" y2="484" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Mint LP -->
+  <rect x="140" y="490" width="260" height="48" rx="8" fill="#5b8a72" filter="url(#ds)"/>
+  <text x="270" y="510" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">Mint LP Tokens</text>
+  <text x="270" y="526" text-anchor="middle" fill="#d0e0d4" font-size="11" font-style="italic">added to recipient tiers</text>
+
+  <!-- Dotted dust arrow -->
+  <line x1="270" y1="538" x2="270" y2="568" stroke="#b0b8c4" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah)"/>
+  <text x="288" y="558" fill="#a0a8b4" font-size="10" font-style="italic">dust</text>
+
+  <!-- Treasury Claims -->
+  <rect x="155" y="574" width="230" height="44" rx="8" fill="#7a5b8a" filter="url(#ds)"/>
+  <text x="270" y="592" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">Treasury Claims</text>
+  <text x="270" y="608" text-anchor="middle" fill="#d8cce0" font-size="11" font-style="italic">tr_a / tr_b</text>
+</svg>
