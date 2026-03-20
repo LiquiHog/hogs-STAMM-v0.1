@@ -59,7 +59,7 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 **Assertions**:
 - LP minted from binding side (A in this case)
 - Excess B refunded atomically
-- Non-binding side uses ceiling division (lp × reserve / total_lp + 1)
+- Non-binding side uses ceiling division (lp x reserve / total_lp + 1)
 - User receives LP + refund in same transaction
 
 ---
@@ -89,7 +89,7 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 **Scenario**:
 1. Tier has reserves 10M A : 20M B (ratio 1:2)
 2. User deposits 2M A + 2M B
-3. 1M A matches 2M B at ratio → 0.5M A excess
+3. 1M A matches 2M B at ratio -> 0.5M A excess
 4. Contract swaps 0.5M A for B (incurs tier fee)
 5. Balanced amounts minted as LP
 
@@ -109,7 +109,7 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 **Scenario**:
 1. Tier has reserves 10M A : 20M B (ratio 1:2)
 2. User deposits 1M A + 4M B
-3. 1M A matches 2M B → 2M B excess
+3. 1M A matches 2M B -> 2M B excess
 4. Contract swaps 2M B for A
 5. Balanced amounts minted as LP
 
@@ -129,7 +129,7 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 1. Tier in bootstrap state (total_lp = 1, reserves 1:1)
 2. User calls mint_hybrid with any ratio deposit
 3. Contract skips swap logic
-4. Executes bootstrap mint: LP = sqrt(deposit_a × deposit_b)
+4. Executes bootstrap mint: LP = sqrt(deposit_a x deposit_b)
 
 **Assertions**:
 - No swap occurs in bootstrap state
@@ -142,7 +142,7 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 
 ### Optimal Swap Split Calculation
 
-**Test**: Deposit A only, contract computes optimal A→B swap amount
+**Test**: Deposit A only, contract computes optimal A->B swap amount
 
 **Scenario**:
 1. Tier has reserves 10M A : 20M B
@@ -162,11 +162,11 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 
 ### Single B Deposit
 
-**Test**: Deposit B only, swap B→A before minting
+**Test**: Deposit B only, swap B->A before minting
 
 **Scenario**:
 1. User deposits B only
-2. Contract computes optimal B→A swap
+2. Contract computes optimal B->A swap
 3. Mints LP from swapped A + remaining B
 
 **Assertions**:
@@ -200,11 +200,11 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 **Scenario**:
 1. Tier has reserves 10M A : 20M B, total_lp = 5M
 2. User burns 1M LP
-3. Receives: (1M / 5M) × 10M A = 2M A, (1M / 5M) × 20M B = 4M B
+3. Receives: (1M / 5M) x 10M A = 2M A, (1M / 5M) x 20M B = 4M B
 4. Floor division favors pool (prevents rounding exploits)
 
 **Assertions**:
-- Output amounts = (lp_burned × reserve) / total_lp (floor division)
+- Output amounts = (lp_burned x reserve) / total_lp (floor division)
 - Total LP reduced by burned amount
 - Reserves reduced by output amounts
 - User receives both assets
@@ -257,7 +257,7 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 **Scenario**:
 1. User burns 1M LP
 2. Contract calculates proportional withdrawal: 2M A, 4M B
-3. Contract internally swaps 4M B → A
+3. Contract internally swaps 4M B -> A
 4. User receives total A (2M + swap output)
 
 **Assertions**:
@@ -275,7 +275,7 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 **Scenario**:
 1. User burns LP
 2. Proportional withdrawal calculated
-3. Internal A → B swap
+3. Internal A -> B swap
 4. User receives total B
 
 **Assertions**:
@@ -307,8 +307,8 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 **Test**: Multiple users mint to same tier
 
 **Scenario**:
-1. User A mints 1M A + 2M B → receives LP_A
-2. User B mints 500K A + 1M B → receives LP_B
+1. User A mints 1M A + 2M B -> receives LP_A
+2. User B mints 500K A + 1M B -> receives LP_B
 3. Reserves update correctly after each mint
 4. Total LP = initial + LP_A + LP_B
 
@@ -373,7 +373,7 @@ Integration tests for all mint and burn operations: standard, hybrid, and single
 
 ## Test Results
 
-✅ **All liquidity management tests passed**, confirming:
+[OK] **All liquidity management tests passed**, confirming:
 - Standard mints work correctly in bootstrap and proportional modes
 - Hybrid mints swap excess and use all deposited assets
 - Single-sided mints calculate optimal swap splits without overflow

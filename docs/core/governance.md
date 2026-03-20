@@ -1,23 +1,20 @@
 # Governance
 
-STAMM separates deployment from ongoing governance. The factory deploys pools, the admin contract governs them, and the registry provides permanent discovery. Each contract has independent freeze and admin transfer mechanisms with timelocks calibrated to its role.
+STAMM separates deployment from ongoing operations. The factory deploys pools, the admin contract governs and withdraws treasury claims, and the registry provides pair/LP discovery.
 
 ---
 
 ## Governor Model
 
-After pool creation and LP registration, the factory transfers governor authority to the admin contract. The admin contract becomes the permanent governor of all pools:
+After `register_pool_lps`, each pool transfers governor authority from the factory to the admin contract.
 
-- Pool governance operations (treasury withdrawals, governor transfer) require going through the admin contract
-- Compromising a single account doesn't affect individual pools — pools don't have individual admin keys
-- The factory cannot call governor-protected methods after handoff
-- Even if the factory is deleted or replaced, the admin contract retains governor authority
+- Pool governor methods (`withdraw_lp`, `withdraw_assets`, `transfer_governor`) are called through the admin contract.
+- The factory cannot call governor-only pool methods after handoff.
+- Governor migration is explicit and timelocked in the admin contract.
 
 ## Timelocks
 
-### Factory — 7-Day Timelocks (604,800 seconds)
-
-All factory governance actions require a propose → confirm cycle with a 7-day waiting period:
+### Factory - 7 Days (604,800 seconds)
 
 | Action | Propose | Confirm | Cancel |
 |---|---|---|---|
@@ -26,66 +23,54 @@ All factory governance actions require a propose → confirm cycle with a 7-day 
 | Registry change | `propose_registry` | `confirm_registry` | `cancel_registry_proposal` |
 | Unfreeze | `propose_unfreeze` | `confirm_unfreeze` | `cancel_unfreeze` |
 
-### Admin Contract — 72-Hour Timelocks (259,200 seconds)
-
-The shorter timelock reflects the higher trust level of the admin contract (it is already the governor of all pools):
+### Admin Contract - 7 Days (604,800 seconds)
 
 | Action | Propose | Confirm | Cancel |
 |---|---|---|---|
 | Admin transfer | `propose_admin` | `accept_admin` | `cancel_admin_proposal` |
-| Freeze | `propose_freeze` | `confirm_freeze` | `cancel_freeze` |
+| Treasury operator change | `propose_treasury` | `confirm_treasury` | `cancel_treasury` |
 | Governor migration | `propose_migration` | `confirm_pool_migration` | `cancel_migration` |
 
-## Freeze Systems
+`guardian` can cancel queued admin/treasury/migration proposals. `set_guardian` is admin-only and not timelocked.
 
-Three independent freeze mechanisms protect different layers of the protocol.
+### Registry - 72 Hours (259,200 seconds)
 
-### Factory Freeze
+| Action | Propose | Confirm | Cancel |
+|---|---|---|---|
+| Admin transfer | `propose_admin` | `accept_admin` | `cancel_admin_proposal` |
 
-- **Freeze**: Instant — `freeze_factory()` blocks template uploads, contract updates, and deletions immediately
-- **Unfreeze**: 7-day timelock — `propose_unfreeze` → `confirm_unfreeze`
-- **Scope**: Pool creation and LP registration remain functional during a freeze
+## Freeze and Update Controls
 
-### Admin Contract Freeze
+### Factory
 
-- **Freeze**: 72-hour timelock — `propose_freeze` → `confirm_freeze`
-- **Irreversible**: Once confirmed, the freeze cannot be undone
-- **Scope**: Blocks update and delete operations. Treasury withdrawals, admin transfer, and governor migration remain functional
-- Governor migration works when frozen, ensuring pools are never permanently locked
+- `freeze_factory()` is instant and blocks template management (`init_template`, `upload_template`) until unfreeze.
+- `propose_unfreeze -> confirm_unfreeze` is 7-day timelocked.
+- Update/delete are permanently blocked by `on_delete_or_update -> op.err()`.
 
-### Registry Freeze
+### Admin Contract
 
-- **Freeze**: Instant — `freeze_registry()` permanently blocks all write operations
-- **Irreversible**: Cannot be undone
-- **Scope**: Read methods (`get_pool`, `get_lp_info`) remain fully functional. Admin transfer still works, preventing the contract from being orphaned
+- No freeze mechanism.
+- Update/delete are permanently blocked by `on_delete_or_update -> op.err()`.
 
-## Admin Transfer
+### Registry
 
-Each contract uses a two-step process for admin transfer:
+- No freeze mechanism.
+- Update/delete remain admin-gated via `on_delete_or_update`.
 
-1. Current admin proposes a new admin address (starts the timelock)
-2. New admin accepts after the timelock expires
+## Governor Migration Flow
 
-The current admin can cancel the proposal at any time before confirmation. For the factory, `accept_admin` is called by the pending admin. For the admin contract, the same pattern applies with a shorter timelock.
+1. Admin proposes a new governor with `propose_migration`.
+2. After 7 days, admin calls `confirm_pool_migration(pool_app_id)` per pool.
+3. Each call forwards `transfer_governor(new_governor)` to that pool.
 
-## Governor Migration
-
-The admin contract can transfer individual pools to a new governor:
-
-1. Admin proposes a new governor address via `propose_migration` (starts 72-hour timelock)
-2. After the timelock, admin calls `confirm_pool_migration(pool_app_id)` per pool
-3. Each confirmation calls `transfer_governor` on the target pool
-
-Migration is per-pool, allowing selective or batched transfers. It works even when the admin contract is frozen.
+Migration is per-pool, so governance can migrate pools in batches.
 
 ## Creation Mode
 
-The factory controls who can create pools via `creation_mode`:
+Factory controls creation access through `creation_mode`:
 
 | Mode | Value | Access |
 |---|---|---|
 | Paused | 0 | No new pools |
 | Admin-only | 1 | Factory admin only |
 | Permissionless | 2 | Anyone |
-
-The admin can change the mode at any time via `set_creation_mode`.

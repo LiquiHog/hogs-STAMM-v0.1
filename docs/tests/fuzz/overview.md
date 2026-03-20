@@ -23,17 +23,17 @@ Hypothesis generates random test cases including:
 - **Operation types**: swap, mint, burn, mint_single, mint_hybrid, burn_single
 - **Amounts**: Random values from small (1 microunit) to large (millions)
 - **Tiers**: Random tier selection (0-5)
-- **Asset directions**: A→B or B→A for swaps
+- **Asset directions**: A->B or B->A for swaps
 - **User roles**: Multiple simulated users with independent balances
 
 ### Property Validation
 
 After each operation, validators check:
 
-1. **Mathematical invariants** — Properties that must always hold (e.g., k-invariant preservation)
-2. **State consistency** — Contract state matches expected values from simulation
-3. **Balance conservation** — Total supply = user balances + pool holdings
-4. **Monotonic properties** — Values that must only increase (e.g., cumulative fees)
+1. **Mathematical invariants** - Properties that must always hold (e.g., k-invariant preservation)
+2. **State consistency** - Contract state matches expected values from simulation
+3. **Balance conservation** - Total supply = user balances + pool holdings
+4. **Monotonic properties** - Values that must only increase (e.g., cumulative fees)
 
 ### Failure Handling
 
@@ -65,7 +65,7 @@ When Hypothesis finds a failing case:
 
 - **Boundary values**: 0, 1, max uint64, max-1
 - **Precision limits**: Operations that test rounding and floor division
-- **State transitions**: Bootstrap → active → inactive → bootstrap again
+- **State transitions**: Bootstrap -> active -> inactive -> bootstrap again
 - **Overflow risks**: Large multiplications that require wide math
 
 ---
@@ -74,13 +74,13 @@ When Hypothesis finds a failing case:
 
 Fuzz tests are organized by property type:
 
-1. **[Invariants](invariants.md)** — Mathematical properties that must always hold
+1. **[Invariants](invariants.md)** - Mathematical properties that must always hold
    - K-invariant preservation
    - Fee accounting balance
    - Reserve consistency
    - LP supply conservation
 
-2. **[Edge Cases](edge-cases.md)** — Boundary conditions and corner cases
+2. **[Edge Cases](edge-cases.md)** - Boundary conditions and corner cases
    - Near-zero reserves
    - Large number handling
    - Precision boundaries
@@ -125,17 +125,17 @@ Fuzz tests run on every commit in CI/CD:
 ## Test Results Summary
 
 All fuzz tests **passed across hundreds of thousands of randomized examples**, confirming:
-- ✅ All mathematical invariants hold for generated operation sequences
-- ✅ No overflow conditions in supported reserve ranges
-- ✅ State transitions occur correctly under random operations
-- ✅ Reserve balances remain consistent through complex operation chains
-- ✅ Fee accounting balances to zero error
-- ✅ Math functions match reference implementations exactly
+- [OK] All mathematical invariants hold for generated operation sequences
+- [OK] No overflow conditions in supported reserve ranges
+- [OK] State transitions occur correctly under random operations
+- [OK] Reserve balances remain consistent through complex operation chains
+- [OK] Fee accounting balances to zero error
+- [OK] Math functions match reference implementations exactly
 
 ---
 
 ## Related Documentation
 
-- [Invariants](invariants.md) — Detailed property validation tests
-- [Edge Cases](edge-cases.md) — Boundary condition and corner case tests
-- [Integration Tests](../integration/overview.md) — End-to-end scenario validation
+- [Invariants](invariants.md) - Detailed property validation tests
+- [Edge Cases](edge-cases.md) - Boundary condition and corner case tests
+- [Integration Tests](../integration/overview.md) - End-to-end scenario validation

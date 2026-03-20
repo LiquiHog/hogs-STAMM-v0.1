@@ -1,6 +1,6 @@
 # Fee Engine
 
-STAMM has a multi-layered fee system that extracts protocol revenue from swaps and redistributes it inline to strengthen the pool. No fees are charged on standard mints or burns — only the internal swap portions of hybrid and single-sided operations incur fees.
+STAMM has a multi-layered fee system that extracts protocol revenue from swaps and redistributes it inline to strengthen the pool. No fees are charged on standard mints or burns - only the internal swap portions of hybrid and single-sided operations incur fees.
 
 ---
 
@@ -14,7 +14,7 @@ STAMM has a multi-layered fee system that extracts protocol revenue from swaps a
 
 Each swap charges fees on both the input and output sides. For a tier with fee rate `f`:
 
-- **Input fee** = `floor(total_fee / 2)`, where `total_fee = floor(amount × fee_rate / 10000)`, floored to 1 microunit
+- **Input fee** = `floor(total_fee / 2)`, where `total_fee = floor(amount x fee_rate / 10000)`, floored to 1 microunit
 - **Output fee** = remainder applied to the raw output, floored to 1 microunit
 
 Both sides are floored to a minimum of 1 microunit. This guarantees that every successful swap grows the k-invariant, even for very small trades where the calculated fee would otherwise round to zero.
@@ -32,7 +32,7 @@ For standard tiers, each half-fee is split:
 - **80%** stays in the tier's reserves (benefits LPs directly)
 - **20%** is extracted as the protocol fee
 
-Tier P keeps **100%** of its fee — no protocol extraction. This protects [Tier P](../core/tiers.md#tier-p-passive-tier) and keeps the near-zero fee tier attractive.
+Tier P keeps **100%** of its fee - no protocol extraction. This protects [Tier P](../core/tiers.md#tier-p-passive-tier) and keeps the near-zero fee tier attractive.
 
 Combined with the per-side fee floor of 1 microunit, the tier-retained portion guarantees the k-invariant always grows on every successful swap.
 
@@ -52,11 +52,11 @@ The weakest tiers are determined by an inline scan of all active tiers during ea
 
 ### 4. LP Minting and Treasury Claims
 
-For each recipient tier, the spill amounts are added to the tier's reserves and proportional LP tokens are minted. These LP tokens stay in the pool — the treasury's share is tracked in `t{c}_tl` state for later withdrawal by the admin contract (governor).
+For each recipient tier, the spill amounts are added to the tier's reserves and proportional LP tokens are minted. These LP tokens stay in the pool - the treasury's share is tracked in `t{c}_tl` state for later withdrawal by the admin contract (governor).
 
 If the spill amount is too small to mint any LP (dust), the tokens go to treasury asset claims (`tr_a`/`tr_b`) instead.
 
-Inactive but seeded tiers can also receive spill — amounts are added at the aggregate reserve ratio and LP is minted using a formula suited for non-proportional deposit ratios.
+Inactive but seeded tiers can also receive spill - amounts are added at the aggregate reserve ratio and LP is minted using a formula suited for non-proportional deposit ratios.
 
 ---
 

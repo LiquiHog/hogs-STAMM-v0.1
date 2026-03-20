@@ -1,6 +1,6 @@
 # Invariant Testing
 
-Property-based tests that validate mathematical invariants — properties that must hold under all conditions across randomized operation sequences.
+Property-based tests that validate mathematical invariants - properties that must hold under all conditions across randomized operation sequences.
 
 ---
 
@@ -11,8 +11,8 @@ Property-based tests that validate mathematical invariants — properties that m
 After any swap, the product of reserves must be strictly greater than the pre-swap product:
 
 ```
-k_post = reserve_a_post × reserve_b_post
-k_pre = reserve_a_pre × reserve_b_pre
+k_post = reserve_a_post x reserve_b_post
+k_pre = reserve_a_pre x reserve_b_pre
 assert k_post > k_pre
 ```
 
@@ -25,22 +25,22 @@ This holds because fee floors guarantee at least 1 microunit is retained on both
 **Property**: K-invariant strictly grows on every swap
 
 **Strategy**:
-1. Generate random swap sequences (A→B and B→A)
+1. Generate random swap sequences (A->B and B->A)
 2. Record k before and after each swap
 3. Assert k_post > k_pre for every swap
 
 **Parameters**:
 - Swap amounts: 1 to 10^9 microunits
 - Tiers: All 6 tiers with varying fee rates
-- Directions: Random A→B or B→A
+- Directions: Random A->B or B->A
 - Sequence length: 1 to 100 swaps per test
 
 **Assertions**:
 - `k_post > k_pre` for successful swaps (fees always applied)
 - No swaps where k decreases (mathematical impossibility)
-- Growth proportional to fee rate (higher fees → larger k growth)
+- Growth proportional to fee rate (higher fees -> larger k growth)
 
-**Results**: ✅ **Passed** — K-invariant maintained across all generated swap sequences
+**Results**: [OK] **Passed** - K-invariant maintained across all generated swap sequences
 
 ---
 
@@ -81,7 +81,7 @@ protocol_fee_in + protocol_fee_out = spill_to_tier_p + spill_to_weakest + spill_
 - `spill_sum + dust = protocol_total` (all protocol fees distributed)
 - For Tier P: `protocol_total = 0` (100% retention)
 
-**Results**: ✅ **Passed** — Fee accounting balances perfectly across all test cases
+**Results**: [OK] **Passed** - Fee accounting balances perfectly across all test cases
 
 ---
 
@@ -117,12 +117,12 @@ contract_balance_b - treasury_claim_b = sum(tier_reserves_b) for all active tier
 - Tiers: Random tier activation states
 
 **Assertions**:
-- Sum of tier reserves ≤ contract balance (some may be in transit or treasury)
+- Sum of tier reserves <= contract balance (some may be in transit or treasury)
 - After accounting for treasury claims: `sum(tier_reserves) + treasury = contract_balance`
 - No "phantom" tokens appearing or disappearing
 - State updates atomic (no partial updates observable)
 
-**Results**: ✅ **Passed** — Reserve consistency maintained across all operation sequences
+**Results**: [OK] **Passed** - Reserve consistency maintained across all operation sequences
 
 ---
 
@@ -133,7 +133,7 @@ contract_balance_b - treasury_claim_b = sum(tier_reserves_b) for all active tier
 Changes in LP token supply must precisely match mint and burn amounts:
 
 ```
-Δ total_lp = lp_minted - lp_burned
+Delta total_lp = lp_minted - lp_burned
 ```
 
 For any operation sequence, the sum of all mints minus the sum of all burns must equal the change in total LP supply.
@@ -164,7 +164,7 @@ For any operation sequence, the sum of all mints minus the sum of all burns must
 - No fractional LP (all amounts uint64)
 - LP supply never negative
 
-**Results**: ✅ **Passed** — LP supply conservation holds exactly across all test sequences
+**Results**: [OK] **Passed** - LP supply conservation holds exactly across all test sequences
 
 ---
 
@@ -196,10 +196,10 @@ Swap output is calculated using constant-product mechanics, where the effective 
 **Assertions**:
 - Contract raw output (before output fee) = `dy_expected`
 - User receives `dy_expected - output_fee`
-- Formula holds for both A→B and B→A swaps
+- Formula holds for both A->B and B->A swaps
 - Wide math (mulw/divmodw) produces exact results
 
-**Results**: ✅ **Passed** — Constant-product formula implemented exactly
+**Results**: [OK] **Passed** - Constant-product formula implemented exactly
 
 ---
 
@@ -210,8 +210,8 @@ Swap output is calculated using constant-product mechanics, where the effective 
 TWAP accumulators must never decrease (they are cumulative):
 
 ```
-accumulator_a_after ≥ accumulator_a_before
-accumulator_b_after ≥ accumulator_b_before
+accumulator_a_after >= accumulator_a_before
+accumulator_b_after >= accumulator_b_before
 ```
 
 Equality holds only if elapsed time = 0 or reserves = 0.
@@ -225,7 +225,7 @@ Equality holds only if elapsed time = 0 or reserves = 0.
 **Strategy**:
 1. Generate random operation sequences with time progression
 2. Record TWAP accumulator values before and after each operation
-3. Calculate expected increment: `price × elapsed_time`
+3. Calculate expected increment: `price x elapsed_time`
 4. Assert accumulators increase by expected amount
 
 **Parameters**:
@@ -239,7 +239,7 @@ Equality holds only if elapsed time = 0 or reserves = 0.
 - Increment = `(aggregate_price_scaled * elapsed)` (128-bit addition)
 - No overflow (128-bit storage sufficient for years of accumulation)
 
-**Results**: ✅ **Passed** — TWAP accumulators increase correctly over time
+**Results**: [OK] **Passed** - TWAP accumulators increase correctly over time
 
 ---
 
@@ -278,17 +278,17 @@ agg_rb = sum(tier_rb for all active tiers)
 - Updates atomic with tier state changes
 - No drift or accumulation errors
 
-**Results**: ✅ **Passed** — Aggregate reserves accurate across all tier states
+**Results**: [OK] **Passed** - Aggregate reserves accurate across all tier states
 
 ---
 
 ## Test Results
 
-✅ **All invariant tests passed**, confirming:
+[OK] **All invariant tests passed**, confirming:
 - K-invariant preserved across all swap sequences (monotonically increasing)
 - Fee accounting balances perfectly (no token creation/destruction)
 - Reserve state consistent with contract balances (no phantom tokens)
-- LP supply conserved exactly (mints - burns = Δ supply)
+- LP supply conserved exactly (mints - burns = Delta supply)
 - Constant-product formula implemented correctly (matches reference)
 - TWAP accumulators increase monotonically over time (no decreases)
 - Aggregate reserves match sum of active tiers (no drift)

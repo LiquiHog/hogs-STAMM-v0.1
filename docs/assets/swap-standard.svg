@@ -36,7 +36,7 @@
   <!-- 80/20 diamond -->
   <polygon points="240,266 260,282 240,298 220,282" fill="#e4e7ec" stroke="#b0b8c4" stroke-width="1.5"/>
 
-  <!-- 20% right → Inline Spill -->
+  <!-- 20% right -> Inline Spill -->
   <line x1="260" y1="282" x2="345" y2="282" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
   <rect x="270" y="270" width="60" height="14" rx="3" fill="#f0ebe0"/>
   <text x="300" y="280" text-anchor="middle" fill="#a09070" font-size="10" font-weight="500">20 %</text>
@@ -62,5 +62,5 @@
   <!-- Output -->
   <rect x="120" y="400" width="240" height="48" rx="24" fill="#4a6fa5" filter="url(#ds)"/>
   <text x="240" y="420" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Trader receives Asset B</text>
-  <text x="240" y="435" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">≥ min_output (slippage protection)</text>
+  <text x="240" y="435" text-anchor="middle" fill="#c0d0e4" font-size="10" font-style="italic">>= min_output (slippage protection)</text>
 </svg>

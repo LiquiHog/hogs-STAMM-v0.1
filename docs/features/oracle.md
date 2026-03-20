@@ -8,9 +8,9 @@ STAMM includes an inline time-weighted average price (TWAP) oracle that updates 
 
 ### Aggregate Price
 
-Unlike single-pool AMMs where the oracle reflects one set of reserves, STAMM’s oracle uses **aggregate reserves across all active tiers** (see [Architecture — Pool State](../core/architecture.md#pool-state-global)). This means the reported price is a liquidity-weighted average, making it harder to manipulate by targeting a single low-liquidity tier.
+Unlike single-pool AMMs where the oracle reflects one set of reserves, STAMM's oracle uses **aggregate reserves across all active tiers** (see [Architecture - Pool State](../core/architecture.md#pool-state-global)). This means the reported price is a liquidity-weighted average, making it harder to manipulate by targeting a single low-liquidity tier.
 
-The aggregate reserves (`agg_ra`, `agg_rb`) are maintained incrementally — updated on every tier state change — so the oracle never needs to loop over tiers.
+The aggregate reserves (`agg_ra`, `agg_rb`) are maintained incrementally - updated on every tier state change - so the oracle never needs to loop over tiers.
 
 ### Inline Updates
 
@@ -26,9 +26,9 @@ The oracle maintains two 256-bit accumulators (each split into four uint64 words
 On each update:
 1. Compute `elapsed = current_timestamp - last_timestamp`
 2. If elapsed > 0 and reserves are non-zero:
-   - Calculate current price of A in terms of B: `price_a = agg_rb × 2^32 / agg_ra`
-   - Calculate current price of B in terms of A: `price_b = agg_ra × 2^32 / agg_rb`
-   - Add `price × elapsed` to respective accumulators (256-bit addition with full carry propagation across all 4 words)
+   - Calculate current price of A in terms of B: `price_a = agg_rb x 2^32 / agg_ra`
+   - Calculate current price of B in terms of A: `price_b = agg_ra x 2^32 / agg_rb`
+   - Add `price x elapsed` to respective accumulators (256-bit addition with full carry propagation across all 4 words)
 3. Update `last_timestamp`
 
 The scale factor is 2^32 (4,294,967,296). This fixed-point scaling provides sufficient precision for price ratios while keeping arithmetic within AVM capabilities.

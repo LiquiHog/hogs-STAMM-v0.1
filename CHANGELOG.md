@@ -13,74 +13,62 @@ All notable changes to the STAMM protocol will be documented here.
 - Standard swap with slippage protection and k-invariant enforcement
 - Price-limited swap (`swap_limit`) with partial execution and atomic refund
 - Smart-routed swap (`swap_smart`) with waterfall routing across up to 3 tiers
-- Caller-directed routed swap (`swap_routed`) with 1-6 explicit (tier, amount) legs packed as N×9 bytes
-- Unified `mint` supporting balanced, hybrid (swap excess + mint), and single-sided (optimal swap split via 128-bit sqrt) modes
-- Unified `burn` supporting proportional and single-sided (burn + internal swap) modes via `output_asset` parameter
+- Caller-directed routed swap (`swap_routed`) with 1-6 explicit (tier, amount) legs packed as N x 9 bytes
+- Unified `mint` supporting balanced, hybrid, and single-sided modes
+- Unified `burn` supporting proportional and single-sided modes via `output_asset`
 - Bitmask-based tier active tracking (`tier_mask`)
-- Auto-activate: tier becomes active when total LP > 1 (first real mint)
-- Auto-deactivate: tier becomes inactive when total LP == 1 (all user LP burned)
-- Sweep-on-final-burn: excess reserves sent to treasury, tier reset to seed state (1,1,1)
+- Auto-activate when total LP > 1, auto-deactivate when total LP == 1
+- Sweep-on-final-burn sends excess reserves to treasury claims and resets tier to seed state
 
 ### Native ALGO Support
-- ALGO/ASA pools with ALGO as asset A (id 0)
+- ALGO/ASA pools with ALGO as `asset_a` (`id=0`)
 - Value encoding for all ABI methods (asset params as uint64, accounts as address)
-- Generic transaction type for A-side deposits (Payment for ALGO, AssetTransfer for ASAs)
-- `do_asset_transfer` branches on asset id: Payment for ALGO, AssetTransfer for ASAs
-- MBR guard on ALGO transfers: `bal - mbr >= amount`
-- Bootstrap skips ALGO opt-in (ALGO doesn't need opt-in)
-- LP token naming handles ALGO (uses "ALGO" string instead of `asset_params_get`)
+- Payment handling for ALGO deposits/withdrawals and AssetTransfer for ASAs
+- MBR guard on outgoing ALGO transfers
 
 ### Fee Engine
-- Two-sided fee model: half fee on input, half on output
-- 80/20 tier-retained/protocol fee split
-- Inline spill: protocol fees redistributed per-swap to Tier P (10%) + 2 weakest tiers (55% + 35%)
-- Weakest tier indices computed inline per-swap via O(5) scan (no cached state)
-- Self-tier exclusion: spill skips the tier being operated on to prevent state conflicts
-- Pull model treasury: claims stored in pool state (`tr_a`, `tr_b`, `t{c}_tl`)
-- Dust from spill (amounts too small to mint LP) goes to treasury claims
-- `tier_retained` floored to 1 on every swap, guaranteeing k always grows
+- Two-sided fee model (input and output side)
+- 80/20 tier-retained/protocol fee split for standard tiers
+- Inline spill distribution to Tier P and weak standard tiers
+- Pull-model treasury claims (`tr_a`, `tr_b`, `t{c}_tl`)
 
 ### Oracle
-- Inline TWAP oracle updated on every reserve-modifying operation
-- 256-bit accumulators (4 × uint64 words per accumulator) with 2^32 fixed-point scale
-- Aggregate-reserve weighted pricing across all active tiers
-- 128-bit cumulative volume counters for both assets (`vol_a_hi/lo`, `vol_b_hi/lo`)
+- Inline TWAP updates on reserve-modifying operations
+- 256-bit TWAP accumulators and 128-bit volume counters
+- Aggregate-reserve weighted pricing across active tiers
 
 ### Architecture
 
 #### Contracts
-- Four-contract architecture: PoolFactory, AdminContract, RegistryContract, and TieredAMM pools
-- PoolFactory as lightweight deployment tool — deploys pools then transfers governor to admin contract
-- PoolFactory with configurable creation mode (paused, admin-only, or permissionless)
+- Four-contract architecture: PoolFactory, AdminContract, RegistryContract, and STAMM pools
+- Factory deploys pools and hands governor to admin contract after LP registration
+- Registry owns pair and LP lookup storage
 
 #### Admin Contract
-- AdminContract as permanent pool governor with treasury withdrawal proxy methods (`withdraw_pool_lp`, `withdraw_pool_assets`)
-- AdminContract 72-hour timelock (259,200 seconds) on admin transfer (`propose_admin` → `accept_admin`)
-- AdminContract freeze: 72-hour timelock, irreversible, blocks update/delete but not treasury or admin transfer
-- AdminContract governor migration: move pools to a new governor with 72-hour timelock (`propose_migration` → `confirm_pool_migration`, per-pool)
+- 7-day timelocks for admin transfer, treasury transfer, and governor migration
+- Dedicated `treasury` role for withdrawals and `guardian` role for cancellation veto
+- Treasury withdrawal proxy methods: `withdraw_pool_lp`, `withdraw_pool_assets`
+- Update/delete blocked by `on_delete_or_update -> op.err()`
 
 #### Registry Contract
-- RegistryContract: permanent on-chain registry for pair→pool and LP→pool discovery
-- Registry stores pair and LP boxes (moved out of factory); survives factory replacement
-- Registry freeze: permanent/irreversible, blocks all writes; reads remain functional
-- Registry writer authorization: only the factory (writer) can register new data
-- One pool per asset pair (enforced via registry box storage)
-- Reverse LP registry: registry box storage maps any LP asset ID to its pool, pair, and tier
+- Single writer model for pair and LP registrations
+- Admin transfer timelock: 72 hours (259,200 seconds)
+- Write signatures include payment args: `register_pair(pay,...)`, `register_lps(pay,...)`
+- Cached box MBR rates with `set_box_mbr_rates(uint64,uint64)`
 
 #### Factory
-- Factory 7-day timelock (604,800 seconds) on admin transfer, admin contract changes, registry changes, and unfreeze
-- Factory freeze system: instant freeze blocks template/update/delete; 7-day timelock to unfreeze
+- 7-day timelocks for admin transfer, admin-contract changes, registry changes, and unfreeze
+- Instant `freeze_factory` plus timelocked unfreeze
+- Cached box MBR rates with `set_box_mbr_rates(uint64,uint64)`
+- Dynamic pool/registry funding using current protocol min-balance values plus cached box MBR math
+- Update/delete blocked by `on_delete_or_update -> op.err()`
 
 #### Pool Setup
-- Two-step pool creation (create_pool → register_pool_lps), followed by seed_and_mint for initial liquidity
-- `registered` flag gates seed_and_mint (ensures LP boxes are written before liquidity)
-- Seed payment sender validation on pool/tier creation
+- Two-step setup: `create_pool` -> `register_pool_lps` -> `seed_and_mint`
+- `registered` gate ensures reverse LP boxes are written before liquidity entry
 
 ### Optimizations
-- Shared subroutines for swap and LP mint calculations
-- Old reserves passed to state updates (eliminates redundant global reads)
-- Inline bootstrap checks using already-read reserves
-- Aggregate reserves used for total liquidity calculations
-- No external keeper required — all fee distribution is inline
-- 51 uint64 + 1 bytes global state (13 spare slots within AVM max of 64)
-- Routing table (RT) box: per-tier fee-adjusted scores for swap_smart tier selection
+- Shared math/routing helpers and reduced redundant global reads
+- No external keeper required for fee redistribution
+- STAMM pool deployment target: 52 uint64 + 1 byte-slice global schema
+- Routing table (RT) box keeps per-tier fee-adjusted scores for `swap_smart`

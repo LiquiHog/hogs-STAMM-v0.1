@@ -55,14 +55,13 @@ The integration test suite validates end-to-end protocol behavior on a live Algo
 #### Administrative Functions
 - **Governor Controls**: Admin operations restricted to admin contract (as governor)
 - **Governor Transfer**: Factory transfers governor to admin contract during registration
-- **Admin Transfer**: 7-day timelock on factory admin transfer; 72-hour timelock on admin contract admin transfer
+- **Admin Transfer**: 7-day timelock on factory and admin-contract admin transfer flows
 - **Factory Freeze/Unfreeze**: Instant freeze, 7-day timelock unfreeze
-- **Admin Contract Freeze**: 72-hour timelock propose/confirm, irreversible
-- **Governor Migration**: 72-hour timelock propose/confirm per pool via admin contract; functional even when admin contract is frozen
+- **Governor Migration**: 7-day timelock propose/confirm per pool via admin contract
 - **Registry Management**: Factory registry change with 7-day timelock (propose/confirm/cancel)
-- **Registry Freeze**: Permanent/irreversible freeze blocking all writes; reads remain functional
 - **Registry Writer Authorization**: Only the factory (writer) can register pair/LP data
-- **Treasury Proxy**: Admin contract withdraws treasury claims from pools (`withdraw_pool_lp`, `withdraw_pool_assets`)
+- **Treasury Role**: Admin contract treasury operator withdraws claims from pools (`withdraw_pool_lp`, `withdraw_pool_assets`)
+- **Guardian Veto**: Guardian can cancel pending admin/treasury/migration proposals
 - **Access Control**: Rejection of unauthorized admin calls
 
 #### Contract Validation
@@ -73,15 +72,15 @@ The integration test suite validates end-to-end protocol behavior on a live Algo
 ### Test Results
 
 All integration tests **passed successfully**, validating:
-- ✅ All 6 tiers function correctly across all operation types
-- ✅ K-invariant maintained across swaps (reserves × fees preserved)
-- ✅ Slippage protection enforced for all operations
-- ✅ Fee accounting accurate across single and multi-tier operations
-- ✅ Tier activation/deactivation triggers work as designed
-- ✅ Multi-user operations execute correctly without conflicts
-- ✅ Treasury accumulation matches expected protocol fee extraction
-- ✅ Contract sizes remain within Algorand limits with comfortable margins
-- ✅ Error conditions properly rejected with appropriate error messages
+- [OK] All 6 tiers function correctly across all operation types
+- [OK] K-invariant maintained across swaps (reserves x fees preserved)
+- [OK] Slippage protection enforced for all operations
+- [OK] Fee accounting accurate across single and multi-tier operations
+- [OK] Tier activation/deactivation triggers work as designed
+- [OK] Multi-user operations execute correctly without conflicts
+- [OK] Treasury accumulation matches expected protocol fee extraction
+- [OK] Contract sizes remain within Algorand limits with comfortable margins
+- [OK] Error conditions properly rejected with appropriate error messages
 
 ---
 
@@ -92,7 +91,7 @@ All integration tests **passed successfully**, validating:
 The fuzz test suite uses Hypothesis for property-based testing, generating randomized operation sequences to verify mathematical invariants and protocol safety properties:
 
 #### Core Invariants
-- **K-Invariant Preservation**: After any swap, `reserves_in × reserves_out` must be greater than or equal to the pre-swap product (accounting for fees)
+- **K-Invariant Preservation**: After any swap, `reserves_in x reserves_out` must be greater than or equal to the pre-swap product (accounting for fees)
 - **Fee Accounting**: Total fees collected must equal sum of tier-retained and protocol treasury fees
 - **Reserve Consistency**: Reserves must always remain positive and match contract state after operations
 - **LP Conservation**: Total LP supply changes must precisely match mint/burn amounts
@@ -118,12 +117,12 @@ The fuzz test suite uses Hypothesis for property-based testing, generating rando
 ### Fuzz Test Results
 
 Property-based tests **passed across hundreds of thousands of randomized examples**, confirming:
-- ✅ K-invariant holds for all generated swap sequences
-- ✅ Fee accounting balances to zero error across complex operation chains
-- ✅ Wide arithmetic functions match reference implementations
-- ✅ No overflow conditions in supported reserve ranges (up to ~2^61 for sqrt operations)
-- ✅ Tier state transitions occur correctly under all tested scenarios
-- ✅ Reserve balances remain consistent through randomized operation sequences
+- [OK] K-invariant holds for all generated swap sequences
+- [OK] Fee accounting balances to zero error across complex operation chains
+- [OK] Wide arithmetic functions match reference implementations
+- [OK] No overflow conditions in supported reserve ranges (up to ~2^61 for sqrt operations)
+- [OK] Tier state transitions occur correctly under all tested scenarios
+- [OK] Reserve balances remain consistent through randomized operation sequences
 
 ---
 
@@ -143,7 +142,7 @@ The test suite exercises:
 - Multi-user concurrent scenarios
 - Error conditions and input validation
 - Admin and governor operations
-- Full lifecycle: deploy → mint → swap → burn → sweep
+- Full lifecycle: deploy -> mint -> swap -> burn -> sweep
 
 ### Validation Methodology
 - **Unit-level**: Individual math functions tested against reference implementations
@@ -158,3 +157,4 @@ The test suite exercises:
 STAMM's comprehensive test suite provides strong confidence in protocol correctness, safety, and reliability. The combination of integration testing (real-world scenarios) and fuzz testing (mathematical properties) ensures the protocol behaves correctly under both typical usage patterns and edge-case conditions.
 
 All tests pass successfully, validating that STAMM operates as designed across its full feature set.
+

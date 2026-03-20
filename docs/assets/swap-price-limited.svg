@@ -25,17 +25,17 @@
 
   <line x1="260" y1="162" x2="260" y2="186" stroke="#b0b8c4" stroke-width="1.5"/>
 
-  <!-- Decision diamond — wider for readability -->
+  <!-- Decision diamond - wider for readability -->
   <polygon points="260,186 296,210 260,234 224,210" fill="#e4e7ec" stroke="#b0b8c4" stroke-width="1.5"/>
   <text x="260" y="213" text-anchor="middle" fill="#6a7080" font-size="10" font-weight="600">fits?</text>
 
-  <!-- YES branch — left -->
+  <!-- YES branch - left -->
   <line x1="224" y1="210" x2="156" y2="210" stroke="#b0b8c4" stroke-width="1.5"/>
   <line x1="156" y1="210" x2="156" y2="258" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
   <rect x="136" y="196" width="68" height="16" rx="3" fill="#e8f0e8"/>
   <text x="170" y="207" text-anchor="middle" fill="#5b8a72" font-size="10" font-weight="600">input fits</text>
 
-  <!-- NO branch — right -->
+  <!-- NO branch - right -->
   <line x1="296" y1="210" x2="364" y2="210" stroke="#b0b8c4" stroke-width="1.5"/>
   <line x1="364" y1="210" x2="364" y2="258" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
   <rect x="314" y="196" width="90" height="16" rx="3" fill="#f0e8e4"/>
@@ -65,5 +65,5 @@
 
   <!-- Output -->
   <rect x="105" y="422" width="310" height="32" rx="16" fill="#4a6fa5" filter="url(#ds)"/>
-  <text x="260" y="443" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Trader receives output ≥ min_output</text>
+  <text x="260" y="443" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Trader receives output >= min_output</text>
 </svg>

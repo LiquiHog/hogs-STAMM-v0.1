@@ -22,13 +22,13 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 - LP amounts: 1 to 1,000
 
 **Assertions**:
-- ✅ No underflow in constant-product formula
-- ✅ Minimum 1 microunit fee enforced (prevents zero fees)
-- ✅ K-invariant grows even on micro-swaps
-- ✅ Bootstrap detection works correctly at threshold
-- ✅ Division by zero prevented (reserve guards)
+- [OK] No underflow in constant-product formula
+- [OK] Minimum 1 microunit fee enforced (prevents zero fees)
+- [OK] K-invariant grows even on micro-swaps
+- [OK] Bootstrap detection works correctly at threshold
+- [OK] Division by zero prevented (reserve guards)
 
-**Results**: ✅ **Passed** — All edge cases handled correctly at minimum liquidity
+**Results**: [OK] **Passed** - All edge cases handled correctly at minimum liquidity
 
 ---
 
@@ -50,13 +50,13 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 - Products: Up to 2^122 (within 128-bit range)
 
 **Assertions**:
-- ✅ No overflow in k-invariant checks (uses full 128-bit comparison)
-- ✅ Sqrt128 converges correctly for large inputs
-- ✅ Fee calculations accurate for large amounts
-- ✅ TWAP accumulator additions handle large increments
-- ✅ All quotient high words (_qh) checked for zero (overflow detection)
+- [OK] No overflow in k-invariant checks (uses full 128-bit comparison)
+- [OK] Sqrt128 converges correctly for large inputs
+- [OK] Fee calculations accurate for large amounts
+- [OK] TWAP accumulator additions handle large increments
+- [OK] All quotient high words (_qh) checked for zero (overflow detection)
 
-**Results**: ✅ **Passed** — Wide math handles all supported reserve ranges
+**Results**: [OK] **Passed** - Wide math handles all supported reserve ranges
 
 ---
 
@@ -69,9 +69,9 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 **Strategy**:
 1. Generate amounts that produce fractional results
 2. Test floor division in:
-   - LP mint calculation (lp = amount × total_lp / reserve)
-   - LP burn calculation (out = lp × reserve / total_lp)
-   - Fee split (retained = total_fee × 80 / 100)
+   - LP mint calculation (lp = amount x total_lp / reserve)
+   - LP burn calculation (out = lp x reserve / total_lp)
+   - Fee split (retained = total_fee x 80 / 100)
 3. Verify pool always receives rounding benefit
 
 **Parameter Ranges**:
@@ -80,12 +80,12 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 - Small total_lp with large amounts
 
 **Assertions**:
-- ✅ Floor division used for all user-facing outputs
-- ✅ Ceiling division used where explicitly required (non-binding mint side)
-- ✅ No accumulation of rounding errors over operations
-- ✅ Pool holdings always ≥ sum(user entitlements)
+- [OK] Floor division used for all user-facing outputs
+- [OK] Ceiling division used where explicitly required (non-binding mint side)
+- [OK] No accumulation of rounding errors over operations
+- [OK] Pool holdings always >= sum(user entitlements)
 
-**Results**: ✅ **Passed** — Rounding consistently pool-favored, no exploit vectors
+**Results**: [OK] **Passed** - Rounding consistently pool-favored, no exploit vectors
 
 ---
 
@@ -106,30 +106,30 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 #### K-Product Overflow
 1. Create tier with reserves: ra = 2^50, rb = 2^50
 2. Product = 2^100 (within 128-bit)
-3. Attempt to grow reserves toward 2^60 × 2^60
+3. Attempt to grow reserves toward 2^60 x 2^60
 4. Verify sqrt128 caps or reverts gracefully
 
 **Assertion**:
-- ✅ Sqrt128 handles up to ~2^61 per reserve safely
+- [OK] Sqrt128 handles up to ~2^61 per reserve safely
 
 #### Fee Calculation Overflow
 1. Swap amount = 2^63 (very large)
 2. Fee bps = 300 (3%)
-3. Calculate: (2^63 × 300) / 10,000 using mulw/divmodw
+3. Calculate: (2^63 x 300) / 10,000 using mulw/divmodw
 4. Verify no overflow
 
 **Assertion**:
-- ✅ Wide math prevents overflow in fee splits
+- [OK] Wide math prevents overflow in fee splits
 
 #### TWAP Accumulator Overflow
 1. Generate years of continuous accumulation
 2. Verify 256-bit accumulators never overflow in realistic scenarios
-3. Price × time products remain within 128-bit
+3. Price x time products remain within 128-bit
 
 **Assertion**:
-- ✅ TWAP accumulators sufficient for practical timeframes
+- [OK] TWAP accumulators sufficient for practical timeframes
 
-**Results**: ✅ **Passed** — All overflow guards functioning, supported ranges validated
+**Results**: [OK] **Passed** - All overflow guards functioning, supported ranges validated
 
 ---
 
@@ -148,26 +148,26 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 **Test Cases**:
 
 #### Activation Threshold
-- total_lp = 1 → Inactive ✓
-- total_lp = 2 → Active ✓
+- total_lp = 1 -> Inactive [OK]
+- total_lp = 2 -> Active [OK]
 - Boundary: Strict greater-than (>)
 
 #### Bootstrap Threshold
-- k ≤ 1,000,000 → Bootstrap mode ✓
-- k > 1,000,000 → Normal mode ✓
+- k <= 1,000,000 -> Bootstrap mode [OK]
+- k > 1,000,000 -> Normal mode [OK]
 - Boundary: Inclusive less-than-or-equal (<=)
 
 #### Reserve Underflow Guard
-- new_reserve = 0 → Reverts ✓
-- new_reserve = 1 → Accepts ✓
-- Boundary: Reserves must be ≥ 1
+- new_reserve = 0 -> Reverts [OK]
+- new_reserve = 1 -> Accepts [OK]
+- Boundary: Reserves must be >= 1
 
 **Assertions**:
-- ✅ All boundary checks use correct operators
-- ✅ No off-by-one errors in threshold logic
-- ✅ State transitions atomic and deterministic
+- [OK] All boundary checks use correct operators
+- [OK] No off-by-one errors in threshold logic
+- [OK] State transitions atomic and deterministic
 
-**Results**: ✅ **Passed** — Boundary conditions handled correctly
+**Results**: [OK] **Passed** - Boundary conditions handled correctly
 
 ---
 
@@ -186,13 +186,13 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 **Test Cases**:
 
 #### Near-Zero Fee Calculation
-- Very small amounts → fee floored at 1 microunit minimum
-- Medium amounts → fee proportional to amount (approaching 1 ppm)
-- Large amounts → fee scales linearly at approximately 1 part per million
+- Very small amounts -> fee floored at 1 microunit minimum
+- Medium amounts -> fee proportional to amount (approaching 1 ppm)
+- Large amounts -> fee scales linearly at approximately 1 part per million
 
 **Assertions**:
-- ✅ Fee floor at 1 microunit enforced
-- ✅ Fee rate approaches 1 ppm for large amounts
+- [OK] Fee floor at 1 microunit enforced
+- [OK] Fee rate approaches 1 ppm for large amounts
 
 #### No Protocol Extraction
 - Execute Tier P swap
@@ -200,16 +200,16 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 - All fees remain in Tier P reserves
 
 **Assertion**:
-- ✅ Tier P split_protocol_fee returns (total_fee, 0)
+- [OK] Tier P split_protocol_fee returns (total_fee, 0)
 
 #### Spill Allocation
 - Execute swap on Tier 2 (generates protocol fees)
 - Verify Tier P receives exactly 10% of protocol fee
 
 **Assertion**:
-- ✅ Tier P receives SPILL_TP_PCT (10%) of inline spill
+- [OK] Tier P receives SPILL_TP_PCT (10%) of inline spill
 
-**Results**: ✅ **Passed** — Tier P special cases implemented correctly
+**Results**: [OK] **Passed** - Tier P special cases implemented correctly
 
 ---
 
@@ -243,12 +243,12 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 - Tier remains: (1, 1, 1)
 
 **Assertions**:
-- ✅ Sweep = max(0, reserve - 1) per side
-- ✅ Treasury incremented by sweep amounts
-- ✅ Tier always reset to exact (1, 1, 1)
-- ✅ No negative sweep amounts
+- [OK] Sweep = max(0, reserve - 1) per side
+- [OK] Treasury incremented by sweep amounts
+- [OK] Tier always reset to exact (1, 1, 1)
+- [OK] No negative sweep amounts
 
-**Results**: ✅ **Passed** — Final burn sweep robust across all reserve states
+**Results**: [OK] **Passed** - Final burn sweep robust across all reserve states
 
 ---
 
@@ -269,10 +269,10 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 #### 0 Standard Tiers (Only Tier P Active)
 - Current tier: Tier P
 - Active standard tiers: none
-- Allocation: 90% → treasury, 10% → Tier P (itself)
+- Allocation: 90% -> treasury, 10% -> Tier P (itself)
 
 **Assertion**:
-- ✅ 90% becomes leftover → treasury claims
+- [OK] 90% becomes leftover -> treasury claims
 
 #### 1 Standard Tier Active
 - Current tier: Tier 2
@@ -280,22 +280,22 @@ Property-based fuzz tests exploring boundary conditions, corner cases, and poten
 - Allocation: 10% Tier P, 90% Tier 4 (gets both 55% + 35%)
 
 **Assertion**:
-- ✅ Single tier receives full 90% standard allocation
+- [OK] Single tier receives full 90% standard allocation
 
 #### Multiple Standard Tiers
 - Active: Tier 0 (weakest), Tier 3 (2nd weakest), Tier 4
 - Allocation: 10% Tier P, 55% Tier 0, 35% Tier 3
 
 **Assertion**:
-- ✅ Standard 10/55/35 split applies
+- [OK] Standard 10/55/35 split applies
 
-**Results**: ✅ **Passed** — Inline spill adapts correctly to all tier configurations
+**Results**: [OK] **Passed** - Inline spill adapts correctly to all tier configurations
 
 ---
 
 ## Test Results
 
-✅ **All edge case tests passed**, confirming:
+[OK] **All edge case tests passed**, confirming:
 - Near-zero reserves handled without underflow
 - Large numbers processed correctly via wide math
 - Precision boundaries favor pool (no rounding exploits)

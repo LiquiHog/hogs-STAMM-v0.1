@@ -18,7 +18,7 @@ Integration tests validate end-to-end protocol behavior on a live AlgoKit LocalN
 ### Pre-Test Setup
 1. **LocalNet Initialization**: Spin up fresh Algorand sandbox network
 2. **Factory Deployment**: Compile and deploy PoolFactory contract
-3. **Pool Creation**: Deploy TieredAMM instance for test asset pair
+3. **Pool Creation**: Deploy STAMM instance for test asset pair
 4. **Bootstrap**: Opt into assets, create all 6 LP tokens with fee rates
 5. **LP Box Registration**: Register reverse LP lookup boxes on registry contract
 6. **Initial Liquidity**: Seed default tiers and add first real liquidity
@@ -41,14 +41,14 @@ Integration tests validate end-to-end protocol behavior on a live AlgoKit LocalN
 
 The integration test suite covers:
 
-- ✅ **Core Infrastructure** — Factory and pool deployment, bootstrap operations
-- ✅ **Trading Operations** — Standard swaps, price-limited swaps, multi-tier routing
-- ✅ **Liquidity Management** — All mint and burn variants (standard, hybrid, single-sided)
-- ✅ **Tier Dynamics** — Auto-activation, auto-deactivation, sweep-on-final-burn
-- ✅ **Multi-User Scenarios** — Concurrent operations from different accounts
-- ✅ **Error Handling** — Slippage protection, invalid inputs, access control
-- ✅ **Fee & Treasury** — Protocol fee extraction, treasury accumulation
-- ✅ **Administrative Functions** — Governor controls, admin transfer
+- [OK] **Core Infrastructure** - Factory and pool deployment, bootstrap operations
+- [OK] **Trading Operations** - Standard swaps, price-limited swaps, multi-tier routing
+- [OK] **Liquidity Management** - All mint and burn variants (standard, hybrid, single-sided)
+- [OK] **Tier Dynamics** - Auto-activation, auto-deactivation, sweep-on-final-burn
+- [OK] **Multi-User Scenarios** - Concurrent operations from different accounts
+- [OK] **Error Handling** - Slippage protection, invalid inputs, access control
+- [OK] **Fee & Treasury** - Protocol fee extraction, treasury accumulation
+- [OK] **Administrative Functions** - Governor controls, admin transfer
 
 ---
 
@@ -69,6 +69,6 @@ All integration tests **passed successfully**, confirming:
 
 ## Related Documentation
 
-- [Trading Operations](trading-operations.md) — Detailed swap and routing test scenarios
-- [Liquidity Management](liquidity-management.md) — Mint and burn operation tests
-- [Tier Dynamics](tier-dynamics.md) — Tier lifecycle and state transition tests
+- [Trading Operations](trading-operations.md) - Detailed swap and routing test scenarios
+- [Liquidity Management](liquidity-management.md) - Mint and burn operation tests
+- [Tier Dynamics](tier-dynamics.md) - Tier lifecycle and state transition tests

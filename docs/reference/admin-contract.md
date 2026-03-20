@@ -1,24 +1,46 @@
 # Admin Contract
 
-The AdminContract is the permanent governor of all registered STAMM pools. It provides treasury withdrawal proxy methods, admin transfer, freeze, and governor migration — all protected by 72-hour timelocks.
+The AdminContract is the permanent governor of registered STAMM pools. It separates governance from treasury execution by introducing dedicated `admin`, `treasury`, and `guardian` roles.
 
 ---
 
 ## Role
 
-After pool creation and LP registration, the factory transfers governor authority to the admin contract. From that point forward, the admin contract is the only account that can call governor-protected methods on pools (treasury withdrawals, governor transfer). This separation means the factory handles deployment while the admin contract handles ongoing governance.
+After `register_pool_lps`, the factory transfers each pool's governor to the admin contract. From that point onward:
+
+- Pool governor methods are invoked through the admin contract.
+- The factory no longer controls pool-governor operations.
+- Treasury withdrawals are performed by `treasury` (not `admin`).
+
+## Roles
+
+| Role | Permissions |
+|---|---|
+| `admin` | Propose/confirm admin, treasury, and governor migration changes; set guardian |
+| `treasury` | Call `withdraw_pool_lp` and `withdraw_pool_assets` |
+| `guardian` | Cancel queued admin, treasury, and migration proposals |
+
+## Timelocks
+
+All admin-contract governance proposals use a 7-day timelock (604,800 seconds):
+
+- `propose_admin` -> `accept_admin`
+- `propose_treasury` -> `confirm_treasury`
+- `propose_migration` -> `confirm_pool_migration`
 
 ## State
 
 | Key | Type | Description |
 |---|---|---|
-| `admin` | bytes | Protocol admin address |
-| `pending_admin` | bytes | Proposed new admin (zero until `propose_admin` is called) |
-| `propose_ts` | uint64 | Admin transfer proposal timestamp for 72-hour timelock |
-| `frozen` | uint64 | Irreversible freeze flag: blocks update/delete |
-| `freeze_ts` | uint64 | Freeze proposal timestamp for 72-hour timelock |
-| `pending_governor` | bytes | Proposed new governor address for pool migration |
-| `governor_propose_ts` | uint64 | Migration proposal timestamp for 72-hour timelock |
+| `admin` | bytes | Governance admin address |
+| `treasury` | bytes | Treasury operator address |
+| `guardian` | bytes | Guardian address (veto/cancel role) |
+| `pending_treasury` | bytes | Proposed treasury address |
+| `treasury_propose_ts` | uint64 | Treasury proposal timestamp |
+| `pending_admin` | bytes | Proposed admin address |
+| `propose_ts` | uint64 | Admin proposal timestamp |
+| `pending_governor` | bytes | Proposed new governor address |
+| `governor_propose_ts` | uint64 | Governor-migration proposal timestamp |
 
 ## ABI Methods
 
@@ -26,43 +48,37 @@ After pool creation and LP registration, the factory transfers governor authorit
 
 | Method | Description |
 |---|---|
-| `propose_admin(address)void` | Propose a new admin (starts 72-hour timelock) |
-| `accept_admin()void` | Accept admin role after timelock (pending admin only) |
-| `cancel_admin_proposal()void` | Cancel a pending admin proposal |
+| `propose_admin(address)void` | Propose a new admin (7-day timelock) |
+| `accept_admin()void` | Pending admin accepts after timelock |
+| `cancel_admin_proposal()void` | Cancel pending admin proposal (admin or guardian) |
 
-### Freeze
+### Treasury Management
 
 | Method | Description |
 |---|---|
-| `propose_freeze()void` | Propose freezing the admin contract (starts 72-hour timelock) |
-| `confirm_freeze()void` | Confirm and execute irreversible freeze after timelock |
-| `cancel_freeze()void` | Cancel a pending freeze proposal |
-
-Once frozen, the admin contract permanently blocks update and delete operations. Treasury withdrawals, admin transfer, and governor migration remain functional.
+| `propose_treasury(address)void` | Propose a new treasury operator (7-day timelock) |
+| `confirm_treasury()void` | Confirm treasury change after timelock |
+| `cancel_treasury()void` | Cancel pending treasury proposal (admin or guardian) |
+| `set_guardian(address)void` | Set or clear guardian (admin only, immediate) |
 
 ### Governor Migration
 
 | Method | Description |
 |---|---|
-| `propose_migration(address)void` | Propose a new governor address for pool migration (starts 72-hour timelock) |
-| `confirm_pool_migration(application)void` | Transfer a pool's governor to the proposed address (per-pool, after timelock) |
-| `cancel_migration()void` | Cancel a pending migration proposal |
-
-Migration works even when the admin contract is frozen, ensuring pools are never permanently locked.
+| `propose_migration(address)void` | Propose new governor address (7-day timelock) |
+| `confirm_pool_migration(application)void` | Migrate one pool to pending governor |
+| `cancel_migration()void` | Cancel pending migration proposal (admin or guardian) |
 
 ### Treasury Withdrawals
 
 | Method | Description |
 |---|---|
-| `withdraw_pool_lp(application,uint64,uint64,address,uint64)void` | Withdraw treasury LP tokens from a pool tier |
-| `withdraw_pool_assets(application,uint64,uint64,uint64,uint64,address)void` | Withdraw treasury raw token claims from a pool |
-
-These proxy methods call governor-protected `withdraw_lp` and `withdraw_assets` on the target pool via inner transactions.
+| `withdraw_pool_lp(application,uint64,uint64,address,uint64)void` | Withdraw treasury LP claims from a pool tier (treasury only) |
+| `withdraw_pool_assets(application,uint64,uint64,uint64,uint64,address)void` | Withdraw treasury asset claims from a pool (treasury only) |
 
 ## Security Properties
 
-- **72-hour timelocks** on all governance actions (admin transfer, freeze, migration)
-- **Irreversible freeze** — once confirmed, cannot be undone; blocks code changes but not operations
-- **No direct pool keys** — pools don't have individual admin keys; all governance flows through the admin contract
-- **Survives factory replacement** — the admin contract retains governor authority independent of the factory
-- **Treasury pull model** — claims are stored in pool state and withdrawn on demand; no opt-in coordination required
+- Governance and treasury execution are separated (`admin` vs `treasury`).
+- Guardian can veto queued governance transitions by cancellation.
+- Delete/update are permanently blocked by `on_delete_or_update -> op.err()`.
+- Pool control remains centralized at the contract address, not individual pool keys.

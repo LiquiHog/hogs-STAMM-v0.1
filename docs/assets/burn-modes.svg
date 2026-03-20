@@ -38,21 +38,21 @@
 
   <!-- Single to A -->
   <rect x="194" y="134" width="132" height="120" rx="8" fill="#c9a227" filter="url(#ds)"/>
-  <text x="260" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Single → A</text>
+  <text x="260" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Single -> A</text>
   <line x1="214" y1="166" x2="306" y2="166" stroke="#f0e6c0" stroke-width="0.5"/>
   <text x="260" y="184" text-anchor="middle" fill="#f0e6c0" font-size="10">output_asset = asset A</text>
   <text x="260" y="200" text-anchor="middle" fill="#f0e6c0" font-size="10">burn proportionally</text>
-  <text x="260" y="216" text-anchor="middle" fill="#f0e6c0" font-size="10">then swap B → A</text>
+  <text x="260" y="216" text-anchor="middle" fill="#f0e6c0" font-size="10">then swap B -> A</text>
   <text x="260" y="232" text-anchor="middle" fill="#f0e6c0" font-size="10">to return only A</text>
   <text x="260" y="246" text-anchor="middle" fill="#f0e6c0" font-size="10">fee on swap part</text>
 
   <!-- Single to B -->
   <rect x="366" y="134" width="132" height="120" rx="8" fill="#c9a227" filter="url(#ds)"/>
-  <text x="432" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Single → B</text>
+  <text x="432" y="156" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Single -> B</text>
   <line x1="386" y1="166" x2="478" y2="166" stroke="#f0e6c0" stroke-width="0.5"/>
   <text x="432" y="184" text-anchor="middle" fill="#f0e6c0" font-size="10">output_asset = asset B</text>
   <text x="432" y="200" text-anchor="middle" fill="#f0e6c0" font-size="10">burn proportionally</text>
-  <text x="432" y="216" text-anchor="middle" fill="#f0e6c0" font-size="10">then swap A → B</text>
+  <text x="432" y="216" text-anchor="middle" fill="#f0e6c0" font-size="10">then swap A -> B</text>
   <text x="432" y="232" text-anchor="middle" fill="#f0e6c0" font-size="10">to return only B</text>
   <text x="432" y="246" text-anchor="middle" fill="#f0e6c0" font-size="10">fee on swap part</text>
 
@@ -68,5 +68,5 @@
   <text x="260" y="323" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Assets Returned to Trader</text>
 
   <!-- Caption -->
-  <text x="260" y="352" text-anchor="middle" fill="#999" font-size="10" font-style="italic">proportional is always fee-free · single-asset modes incur a swap fee on the converted portion</text>
+  <text x="260" y="352" text-anchor="middle" fill="#999" font-size="10" font-style="italic">proportional is always fee-free - single-asset modes incur a swap fee on the converted portion</text>
 </svg>

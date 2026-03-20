@@ -1,6 +1,6 @@
 # Tiers
 
-Tiers are the core concept that makes STAMM different from a standard AMM. Each tier is an independent constant-product market with its own reserves, fee rate, and LP token — but all tiers share the same asset pair and live inside the same contract.
+Tiers are the core concept that makes STAMM different from a standard AMM. Each tier is an independent constant-product market with its own reserves, fee rate, and LP token - but all tiers share the same asset pair and live inside the same contract.
 
 ## Why Tiers?
 
@@ -35,12 +35,12 @@ Every pool is created with all 6 tiers. LP tokens for all 6 are created during b
 
 Tier P is a special tier at index 5 with unique properties:
 
-- **Near-zero fee**: ~1 part per million (0.0001%), calculated as `max(1, amount / 1,000,000)` — the floor makes the effective rate higher for small amounts
+- **Near-zero fee**: ~1 part per million (0.0001%), calculated as `max(1, amount / 1,000,000)` - the floor makes the effective rate higher for small amounts
 - **No protocol fee extraction**: 100% of fees stay in the tier's reserves
 - **Inline spill recipient**: Receives 10% of protocol fees from every swap via the inline spill mechanism
 - **Backstop role**: Provides deep, low-cost liquidity as a baseline
 
-Tier P is protocol-managed — it is not open to public LPs. Its liquidity is built through the inline spill redistribution mechanism, where a portion of fees from every swap are deposited into Tier P's reserves and LP tokens are minted to the treasury.
+Tier P is protocol-managed - it is not open to public LPs. Its liquidity is built through the inline spill redistribution mechanism, where a portion of fees from every swap are deposited into Tier P's reserves and LP tokens are minted to the treasury.
 
 ## Tier Lifecycle
 
@@ -98,6 +98,6 @@ From an LP's perspective:
 - **Active LPs** may prefer lower-fee tiers that attract more volume, earning more total fees despite the lower rate
 - **Passive LPs** may prefer higher-fee tiers, accepting less volume in exchange for less impermanent loss
 
-Tier P is not available for public LP deposits — it is funded solely by the inline spill redistribution.
+Tier P is not available for public LP deposits - it is funded solely by the inline spill redistribution.
 
 Each tier's LP token is a standard Algorand ASA, fully transferable and composable.

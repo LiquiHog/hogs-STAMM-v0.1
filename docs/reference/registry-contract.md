@@ -1,61 +1,62 @@
 # Registry Contract
 
-The RegistryContract is a permanent on-chain directory for pool and LP discovery. It maps asset pairs to pool app IDs and LP asset IDs to their pool, pair, and tier — surviving factory replacement or deletion.
+The RegistryContract is STAMM's on-chain directory for pair and LP lookups. It stores pair->pool and LP->(pool,pair,tier) mappings in box storage.
 
 ---
 
 ## Role
 
-The registry stores all pair and LP lookup data in box storage. Only the authorized writer (the factory's application address) can register new data. The factory forwards MBR to the registry before each write. Read methods are available to anyone and remain functional even when the registry is frozen.
+- Holds canonical lookup data used by SDKs, wallets, and indexers.
+- Uses a single authorized `writer` (factory app address) for registrations.
+- Verifies MBR funding inline through payment arguments on write methods.
 
 ## State
 
 | Key | Type | Description |
 |---|---|---|
 | `admin` | bytes | Registry admin address |
-| `writer` | bytes | Authorized writer address (factory app address) |
-| `frozen` | uint64 | Permanent freeze flag: blocks writes and writer changes |
+| `pending_admin` | bytes | Proposed admin address |
+| `propose_ts` | uint64 | Admin-transfer proposal timestamp (72-hour timelock) |
+| `box_flat_mbr` | uint64 | Cached box base MBR in uALGO (default 2500) |
+| `box_byte_mbr` | uint64 | Cached per-byte MBR in uALGO (default 400) |
+| `writer` | bytes | Authorized writer address |
 
-### Box Storage
+## Box Storage
 
 | Box Key | Value | Description |
 |---|---|---|
-| `p` + itob(min_asset_id) + itob(max_asset_id) | bytes(8) | Pool app ID for the pair |
-| `l` + itob(lp_asset_id) | bytes(32) | pool_app_id + asset_a_id + asset_b_id + tier_index |
-
-Pair boxes use the canonical ordering (min, max) of the two asset IDs. LP boxes store 32 bytes: the pool app ID, both asset IDs, and the tier index. This enables a single box read to resolve any LP token to its full context.
+| `p + itob(min_asset_id) + itob(max_asset_id)` | bytes(8) | Pool app ID for an asset pair |
+| `l + itob(lp_asset_id)` | bytes(32) | `pool_app_id + asset_a_id + asset_b_id + tier_index` |
 
 ## ABI Methods
 
-### Write Operations (writer only)
+### Write Methods (writer only)
 
 | Method | Description |
 |---|---|
-| `register_pair(uint64,uint64,uint64)void` | Register a new pair → pool mapping |
-| `register_lps(application)void` | Register 6 reverse LP lookup boxes for a pool |
+| `register_pair(pay,uint64,uint64,uint64)void` | Register pair->pool mapping with MBR payment validation |
+| `register_lps(pay,uint64)void` | Register 6 reverse LP boxes for a pool with MBR payment validation |
 
-`register_pair` enforces one-pool-per-pair — attempting to register a duplicate pair fails. `register_lps` verifies the pool's creator matches the writer, preventing registration of rogue contracts.
-
-### Read Operations (permissionless)
+### Read Methods
 
 | Method | Description |
 |---|---|
-| `get_pool(uint64,uint64)uint64` | Look up pool app ID for an asset pair |
-| `get_lp_info(uint64)byte[]` | Look up pool info (app ID, pair, tier) for an LP asset ID |
+| `get_pool(uint64,uint64)uint64` | Resolve pair->pool |
+| `get_lp_info(uint64)byte[]` | Resolve LP->pool/pair/tier |
 
-### Admin Operations
+### Admin Methods
 
 | Method | Description |
 |---|---|
-| `set_writer(address)void` | Set the authorized writer address (admin only, blocked when frozen) |
-| `set_admin(address)void` | Set registry admin (admin only, works when frozen) |
-| `freeze_registry()void` | Permanently freeze the registry — blocks all writes (admin only, irreversible) |
+| `set_writer(address)void` | Set writer address (admin only) |
+| `propose_admin(address)void` | Propose admin transfer (72-hour timelock) |
+| `accept_admin()void` | Pending admin accepts after timelock |
+| `cancel_admin_proposal()void` | Cancel pending admin transfer |
+| `set_box_mbr_rates(uint64,uint64)void` | Update cached box MBR rates |
 
 ## Security Properties
 
-- **Writer authorization** — only the factory can register new pair and LP data
-- **Creator verification** — `register_lps` verifies the pool's creator matches the writer
-- **One pool per pair** — enforced by box storage; duplicate registrations fail
-- **Irreversible freeze** — `freeze_registry` permanently blocks all writes; reads remain functional
-- **Admin independence** — admin transfer works even when frozen, preventing the contract from being orphaned
-- **Permanence** — registry data survives factory replacement or deletion; pool discovery is always available
+- Writer-only registration for pair and LP records.
+- `register_lps` validates that the target pool creator matches `writer`.
+- One-pool-per-pair enforced by pair-box uniqueness.
+- No freeze mode; update/delete remain admin-gated via `on_delete_or_update`.

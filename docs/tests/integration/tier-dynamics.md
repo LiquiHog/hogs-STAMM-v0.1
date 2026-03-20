@@ -73,7 +73,7 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 
 **Assertions**:
 - Tier mask bit set for tier (mask |= 1 << tier)
-- Tier state change: inactive → active
+- Tier state change: inactive -> active
 - Aggregate reserves updated (agg_ra += tier_ra, agg_rb += tier_rb)
 - TWAP oracle includes tier in next update
 
@@ -85,8 +85,8 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 
 **Scenario**:
 1. Seed state: total_lp = 1
-2. Mint that produces LP = 0 (dust) → remains at total_lp = 1 → inactive
-3. Mint that produces LP = 1 → total_lp = 2 → activates
+2. Mint that produces LP = 0 (dust) -> remains at total_lp = 1 -> inactive
+3. Mint that produces LP = 1 -> total_lp = 2 -> activates
 
 **Assertions**:
 - Threshold is strict: total_lp > 1 (not >=)
@@ -101,9 +101,9 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 
 **Scenario**:
 1. Seed Tiers 0, 1, 2, 3, 4, P
-2. Mint liquidity to Tier 0 → activates
-3. Mint liquidity to Tier 3 → activates
-4. Mint liquidity to Tier P → activates
+2. Mint liquidity to Tier 0 -> activates
+3. Mint liquidity to Tier 3 -> activates
+4. Mint liquidity to Tier P -> activates
 5. Tier mask = bits 0, 3, 5 set
 
 **Assertions**:
@@ -128,7 +128,7 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 
 **Assertions**:
 - Tier mask bit cleared (mask &= ~(1 << tier))
-- Tier state change: active → inactive
+- Tier state change: active -> inactive
 - Aggregate reserves updated (agg_ra -= tier_ra, agg_rb -= tier_rb)
 - TWAP oracle excludes tier from next update
 - Tier remains seeded (total_lp = 1, reserves = 1, 1)
@@ -183,7 +183,7 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 2. Tier mask = 0b101001 = 41
 
 **Assertions**:
-- Bit `i` set ⟺ tier `i` active
+- Bit `i` set <-> tier `i` active
 - Bit check: `mask & (1 << tier)` returns non-zero for active tiers
 - Efficient single-uint64 storage for all 6 tier states
 
@@ -194,8 +194,8 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Test**: Mask updates atomically with tier activation/deactivation
 
 **Scenario**:
-1. Tier 2 activates → mask |= (1 << 2) → bit 2 set
-2. Tier 2 deactivates → mask &= ~(1 << 2) → bit 2 cleared
+1. Tier 2 activates -> mask |= (1 << 2) -> bit 2 set
+2. Tier 2 deactivates -> mask &= ~(1 << 2) -> bit 2 cleared
 
 **Assertions**:
 - Mask read from global state: `AppGlobal.get_ex_uint64(..., "tier_mask")`
@@ -261,9 +261,9 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Test**: Aggregate reserves updated on every tier state change
 
 **Scenario**:
-1. Tier 2 receives swap → reserves increase → aggregate increases
-2. Tier 3 receives inline spill → reserves increase → aggregate increases
-3. Tier 4 LP burn → reserves decrease → aggregate decreases
+1. Tier 2 receives swap -> reserves increase -> aggregate increases
+2. Tier 3 receives inline spill -> reserves increase -> aggregate increases
+3. Tier 4 LP burn -> reserves decrease -> aggregate decreases
 
 **Assertions**:
 - Aggregate = sum of all active tier reserves (maintained incrementally)
@@ -329,9 +329,9 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Scenario**:
 1. Swap on Tier 2 generates 1,000 protocol fee A + 2,000 protocol fee B
 2. Inline spill distributes:
-   - 10% (100 A, 200 B) → Tier P
-   - 55% (550 A, 1,100 B) → weakest tier (Tier 0)
-   - 35% (350 A, 700 B) → 2nd weakest tier (Tier 4)
+   - 10% (100 A, 200 B) -> Tier P
+   - 55% (550 A, 1,100 B) -> weakest tier (Tier 0)
+   - 35% (350 A, 700 B) -> 2nd weakest tier (Tier 4)
 3. Each recipient tier reserves increase, LP minted to treasury
 
 **Assertions**:
@@ -349,7 +349,7 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 **Scenario**:
 1. Tier 4 inactive but seeded (total_lp = 1)
 2. Receives inline spill deposits
-3. LP minted from spill > 0 → total_lp = 1 + minted
+3. LP minted from spill > 0 -> total_lp = 1 + minted
 4. Tier 4 auto-activates
 
 **Assertions**:
@@ -362,7 +362,7 @@ Integration tests for tier lifecycle operations: seeding, auto-activation, auto-
 
 ## Test Results
 
-✅ **All tier dynamics tests passed**, confirming:
+[OK] **All tier dynamics tests passed**, confirming:
 - Default and individual tier seeding works correctly
 - Auto-activation triggers when total_lp > 1
 - Auto-deactivation triggers when total_lp returns to 1

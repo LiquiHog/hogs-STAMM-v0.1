@@ -8,7 +8,7 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 
 ### Basic Swap Validation
 
-**Test**: Execute a simple A→B swap on a single tier
+**Test**: Execute a simple A->B swap on a single tier
 
 **Scenario**:
 1. User deposits 1,000,000 microunits of Asset A
@@ -28,7 +28,7 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 
 ### Reverse Direction Swap
 
-**Test**: Execute B→A swap (opposite direction)
+**Test**: Execute B->A swap (opposite direction)
 
 **Scenario**:
 1. User deposits Asset B
@@ -107,7 +107,7 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 - Swap amount < input amount
 - Refund amount = input - swap amount
 - User receives both output + refund atomically
-- Post-swap marginal price ≈ price limit (within fee tolerance)
+- Post-swap marginal price ~ price limit (within fee tolerance)
 
 ---
 
@@ -150,8 +150,8 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 
 **Scenario**:
 1. Create pool with Asset A = ALGO (id 0), Asset B = ASA
-2. Execute A→B swap (ALGO in, ASA out)
-3. Execute B→A swap (ASA in, ALGO out)
+2. Execute A->B swap (ALGO in, ASA out)
+3. Execute B->A swap (ASA in, ALGO out)
 
 **Assertions**:
 - ALGO deposits use Payment transactions
@@ -237,7 +237,7 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 2. Transaction reverts: `"reserve_b underflow"` or `"reserve_a underflow"`
 
 **Assertions**:
-- Post-swap reserves must be ≥ 1 microunit
+- Post-swap reserves must be >= 1 microunit
 - Underflow check prevents reserve depletion
 - Error message indicates which reserve would underflow
 
@@ -250,9 +250,9 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 **Test**: Multiple users swap on same tier simultaneously
 
 **Scenario**:
-1. User A swaps A→B
-2. User B swaps B→A (same tier)
-3. User C swaps A→B again
+1. User A swaps A->B
+2. User B swaps B->A (same tier)
+3. User C swaps A->B again
 4. Verify all swaps execute correctly in sequence
 
 **Assertions**:
@@ -418,7 +418,7 @@ Integration tests for swap operations, price-limited swaps, and multi-tier routi
 
 ## Test Results
 
-✅ **All trading operation tests passed**, confirming:
+[OK] **All trading operation tests passed**, confirming:
 - Standard swaps execute correctly on all tiers
 - Price-limited swaps refund unused input atomically
 - Smart-routed swaps optimally split across up to 3 tiers

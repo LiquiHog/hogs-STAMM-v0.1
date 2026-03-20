@@ -27,31 +27,31 @@
 
   <!-- Legs panel -->
   <rect x="28" y="190" width="464" height="100" rx="10" fill="#f0ebe0" stroke="#ddd4c0" stroke-width="1"/>
-  <text x="260" y="208" text-anchor="middle" fill="#a09070" font-size="10" font-weight="500" letter-spacing="1">EXECUTE LEGS SEQUENTIALLY (1 – 6)</text>
+  <text x="260" y="208" text-anchor="middle" fill="#a09070" font-size="10" font-weight="500" letter-spacing="1">EXECUTE LEGS SEQUENTIALLY (1 - 6)</text>
 
   <!-- Leg boxes -->
   <rect x="40" y="218" width="70" height="58" rx="6" fill="#b05c3b" filter="url(#ds)"/>
   <text x="75" y="238" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Leg 1</text>
-  <text x="75" y="254" text-anchor="middle" fill="#e0c8c0" font-size="9">T₂ · 400k</text>
+  <text x="75" y="254" text-anchor="middle" fill="#e0c8c0" font-size="9">T2 - 400k</text>
   <text x="75" y="268" text-anchor="middle" fill="#e0c8c0" font-size="8" font-style="italic">fee + k-growth</text>
 
   <rect x="118" y="218" width="70" height="58" rx="6" fill="#b05c3b" filter="url(#ds)"/>
   <text x="153" y="238" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Leg 2</text>
-  <text x="153" y="254" text-anchor="middle" fill="#e0c8c0" font-size="9">T₀ · 350k</text>
+  <text x="153" y="254" text-anchor="middle" fill="#e0c8c0" font-size="9">T0 - 350k</text>
   <text x="153" y="268" text-anchor="middle" fill="#e0c8c0" font-size="8" font-style="italic">fee + k-growth</text>
 
   <rect x="196" y="218" width="70" height="58" rx="6" fill="#b05c3b" filter="url(#ds)"/>
   <text x="231" y="238" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Leg 3</text>
-  <text x="231" y="254" text-anchor="middle" fill="#e0c8c0" font-size="9">T₁ · 250k</text>
+  <text x="231" y="254" text-anchor="middle" fill="#e0c8c0" font-size="9">T1 - 250k</text>
   <text x="231" y="268" text-anchor="middle" fill="#e0c8c0" font-size="8" font-style="italic">fee + k-growth</text>
 
   <!-- Ellipsis -->
-  <text x="300" y="252" text-anchor="middle" fill="#a09070" font-size="16" font-weight="600">···</text>
+  <text x="300" y="252" text-anchor="middle" fill="#a09070" font-size="16" font-weight="600">---</text>
 
   <!-- Leg N -->
   <rect x="338" y="218" width="70" height="58" rx="6" fill="#b05c3b" filter="url(#ds)" opacity="0.6"/>
   <text x="373" y="238" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Leg N</text>
-  <text x="373" y="254" text-anchor="middle" fill="#e0c8c0" font-size="9">T₄ · rest</text>
+  <text x="373" y="254" text-anchor="middle" fill="#e0c8c0" font-size="9">T4 - rest</text>
   <text x="373" y="268" text-anchor="middle" fill="#e0c8c0" font-size="8" font-style="italic">fee + k-growth</text>
 
   <line x1="260" y1="290" x2="260" y2="314" stroke="#b0b8c4" stroke-width="1.5" marker-end="url(#ah)"/>
@@ -72,5 +72,5 @@
 
   <!-- Output -->
   <rect x="130" y="462" width="260" height="32" rx="16" fill="#4a6fa5" filter="url(#ds)"/>
-  <text x="260" y="483" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Combined Output ≥ min_output</text>
+  <text x="260" y="483" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Combined Output >= min_output</text>
 </svg>
